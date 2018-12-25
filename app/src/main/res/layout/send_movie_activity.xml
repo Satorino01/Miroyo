@@ -5,12 +5,13 @@ xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context=".SendMovieActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="32dp"
         android:layout_marginBottom="16dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -22,7 +23,7 @@ tools:context=".SendMovieActivity">
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="送信友達の選択" />
+            android:text="送信する友達の選択" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -46,17 +47,16 @@ tools:context=".SendMovieActivity">
                     android:layout_width="80dp"
                     android:layout_height="100dp"
                     android:layout_marginLeft="8dp"
-                    app:srcCompat="@drawable/sampleicon" />
+                    app:srcCompat="@drawable/sampleusericon" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginRight="8dp"
-                    >
+                    android:layout_marginBottom="8dp"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/textView5"
@@ -75,11 +75,11 @@ tools:context=".SendMovieActivity">
         </FrameLayout>
 
         <TextView
-            android:layout_marginTop="16dp"
             android:id="@+id/movie_choice_txt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="送信する動画を選択" />
+            android:layout_marginTop="16dp"
+            android:text="送信する動画ファイルの選択" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -107,10 +107,10 @@ tools:context=".SendMovieActivity">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginRight="8dp"
+                    android:layout_marginBottom="8dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -134,13 +134,16 @@ tools:context=".SendMovieActivity">
             android:id="@+id/send_button"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/shape_rounded_corners_5dp"
             android:text="送信ボタン" />
     </LinearLayout>
+
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
 </android.support.constraint.ConstraintLayout>
