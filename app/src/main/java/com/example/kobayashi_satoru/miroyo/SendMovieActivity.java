@@ -1,5 +1,6 @@
 package com.example.kobayashi_satoru.miroyo;
 
+import android.annotation.SuppressLint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -10,7 +11,6 @@ public class SendMovieActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         // ここで1秒間スリープし、スプラッシュを表示させたままにする。
         try {
             Thread.sleep(1000);
@@ -23,5 +23,6 @@ public class SendMovieActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.container, SendMovieFragment.newInstance()).commitNow();
         }
+
     }
 }
