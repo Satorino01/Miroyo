@@ -44,7 +44,8 @@ tools:context=".SendMovieActivity">
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/clear_button_bg"
-                android:text=""/>
+                android:text=""
+                android:onClick="onClickSetUserButton"/>
 
             <LinearLayout
                 android:layout_width="match_parent"

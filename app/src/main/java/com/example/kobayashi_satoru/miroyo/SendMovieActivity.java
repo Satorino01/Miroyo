@@ -35,4 +35,9 @@ public class SendMovieActivity extends AppCompatActivity {
         //startActivityForResult(intent);
         startActivity(intent);
     }
+    public void onClickSetUserButton(View view){
+        Intent intent = new Intent(this, SetUserActivity.class);
+        startActivity(intent);
+    }
+
 }
