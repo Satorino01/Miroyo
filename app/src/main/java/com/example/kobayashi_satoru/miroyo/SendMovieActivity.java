@@ -17,6 +17,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,12 @@ public class SendMovieActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG,"AAAAAAAAAAAAA");
+
+        Log.d(TAG,"SendMovieActivity起動！！");
+
+        //FirebaseMessagingのトピック起動
+        FirebaseMessaging.getInstance().subscribeToTopic("test");
+
         // ここで1秒間スリープし、スプラッシュを表示させたままにする。
         try {
             Thread.sleep(1000);
@@ -39,47 +45,47 @@ public class SendMovieActivity extends AppCompatActivity {
         // スプラッシュthemeを通常themeに変更する
         setTheme(R.style.AppTheme);
         setContentView(R.layout.send_movie_activity);
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // Create a new user with a first, middle, and last name
-        Map<String, Object> user = new HashMap<>();
-        user.put("EmailAddress", "asasa@mail");
-        user.put("UserName", "Mathison");
-        user.put("OAuthTokenFacebook", "rqefd3");
-        user.put("OAuthTokenGoogle", "saa323");
-
-        // Add a new document with a generated ID
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "成功しましたあああDocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
-
-        // Create a new user with a first and last name
-        db.collection("users")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " 成功 => " + document.getData());
-                            }
-                        } else {
-                            Log.w(TAG, "AAAAAAAAAAAAAError getting documents.", task.getException());
-                        }
-                    }
-                });
+//
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        // Create a new user with a first, middle, and last name
+//        Map<String, Object> user = new HashMap<>();
+//        user.put("EmailAddress", "asasa@mail");
+//        user.put("UserName", "Mathison");
+//        user.put("OAuthTokenFacebook", "rqefd3");
+//        user.put("OAuthTokenGoogle", "saa323");
+//
+//        // Add a new document with a generated ID
+//        db.collection("users")
+//                .add(user)
+//                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//                    @Override
+//                    public void onSuccess(DocumentReference documentReference) {
+//                        Log.d(TAG, "成功しましたあああDocumentSnapshot added with ID: " + documentReference.getId());
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.w(TAG, "Error adding document", e);
+//                    }
+//                });
+//
+//        // Create a new user with a first and last name
+//        db.collection("users")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                Log.d(TAG, document.getId() + " 成功 => " + document.getData());
+//                            }
+//                        } else {
+//                            Log.w(TAG, "AAAAAAAAAAAAAError getting documents.", task.getException());
+//                        }
+//                    }
+//                });
 
 
 
