@@ -15,9 +15,7 @@ import java.util.Map;
 public class ReceiveVideoFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        Log.d("KobayashiSatoruOfTagTo:", "onMessageReceived起動ううううううううううううううう");
-        super.onMessageReceived(remoteMessage);
-
+        Log.d("FirebaseMessaging", "onMessageReceived起動!");
         // データの受信
         Map<String, String> data        = remoteMessage.getData();
         String id             = "";
@@ -26,7 +24,10 @@ public class ReceiveVideoFirebaseMessagingService extends FirebaseMessagingServi
         if (data.containsKey("id")){ id = data.get("id"); }
         if (data.containsKey("label") ){ label = data.get("label");  }
         if (data.containsKey("text") ){ text = data.get("text");  }
-        Log.d("KobayashiSatoruOfTagTo:", data.get("id"));
+
+        Log.d("プッシュ通知のID：", data.get("id"));
+        Log.d("プッシュ通知のLABEL：", data.get("label"));
+        Log.d("プッシュ通知のTEXT：", data.get("text"));
 
         // 通知の作成
         NotificationCompat.Builder builder  = new NotificationCompat.Builder(getApplicationContext());
