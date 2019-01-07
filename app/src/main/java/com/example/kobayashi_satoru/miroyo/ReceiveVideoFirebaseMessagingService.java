@@ -29,6 +29,10 @@ public class ReceiveVideoFirebaseMessagingService extends FirebaseMessagingServi
         Log.d("プッシュ通知のLABEL：", data.get("label"));
         Log.d("プッシュ通知のTEXT：", data.get("text"));
 
+        Intent intent = new Intent(this, PlayVideoActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getApplication().startActivity(intent);
+
         // 通知の作成
         NotificationCompat.Builder builder  = new NotificationCompat.Builder(getApplicationContext());
         builder.setSmallIcon(R.mipmap.ic_launcher);

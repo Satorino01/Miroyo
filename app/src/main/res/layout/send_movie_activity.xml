@@ -164,10 +164,11 @@ tools:context=".SendMovieActivity">
             android:layout_marginBottom="32dp"
             android:background="@drawable/shape_rounded_corners_5dp">
             <Button
+                android:onClick="onClickSendVideoButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/clear_button_bg"
-                android:text="送信ボタン">
+                android:text="@string/send_video_button_name">
             </Button>
         </FrameLayout>
     </LinearLayout>
