@@ -115,7 +115,7 @@ public class SendMovieActivity extends AppCompatActivity {
     }
 
     /** クリック連打制御時間(ミリ秒) */
-    private static final long CLICK_DELAY = 1000;
+    private static final long CLICK_DELAY = 2000;
     /** 前回のクリックイベント実行時間 */
     private static long mOldClickTime;
 
