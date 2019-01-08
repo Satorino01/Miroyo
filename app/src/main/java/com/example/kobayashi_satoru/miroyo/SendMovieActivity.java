@@ -35,6 +35,7 @@ public class SendMovieActivity extends AppCompatActivity {
         FirebaseMessaging.getInstance().unsubscribeFromTopic(responseUserID);
         //自分のID名でFirebaseMessagingのトピック起動
         FirebaseMessaging.getInstance().subscribeToTopic(myUserID);
+
         // ここで1秒間スリープし、スプラッシュを表示させたままにする。
         setTheme(R.style.SplashTheme);
         try {
@@ -61,6 +62,7 @@ public class SendMovieActivity extends AppCompatActivity {
 
 
     public void onClickSendVideoButton(View view) {
+        if (!isClickEvent()) return;
         Map<String, Object> request = new HashMap<>();
         request.put("RequestUserName", myUserName);
         request.put("RequestUserID", myUserID);
@@ -110,5 +112,27 @@ public class SendMovieActivity extends AppCompatActivity {
         };
         HttpRequestTask httpTask =new HttpRequestTask();
         httpTask.execute(mapData);
+    }
+
+    /** クリック連打制御時間(ミリ秒) */
+    private static final long CLICK_DELAY = 1000;
+    /** 前回のクリックイベント実行時間 */
+    private static long mOldClickTime;
+
+    /**
+     * クリックイベントが実行可能か判断する。
+     * @return クリックイベントの実行可否 (true:可, false:否)
+     */
+    public static boolean isClickEvent() {
+        // 現在時間を取得する
+        long time = System.currentTimeMillis();
+
+        // 一定時間経過していなければクリックイベント実行不可
+        if (time - mOldClickTime < CLICK_DELAY) {
+            return false;
+        }
+        // 一定時間経過したらクリックイベント実行可能
+        mOldClickTime = time;
+        return true;
     }
 }
