@@ -4,19 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.provider.DocumentsContract;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.kobayashi_satoru.miroyo.ui.sendmovie.SendMovieViewModel;
-import com.facebook.login.Login;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -26,12 +23,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +36,7 @@ public class SendMovieActivity extends AppCompatActivity {
     private String TAG = "SendMovieActivity";
     private String myUserID = "UnknownID";
     private String myUserName = "UnknownName";
-    private String responseUserID = "wvJVcJftx3QMwdnF4Uzf4kTlNKd2";
+    private String responseUserID;
     private String videoURL;
     private SendMovieViewModel sendMovieViewModel;
     private FirebaseAuth firebaseAuth;
@@ -82,6 +76,8 @@ public class SendMovieActivity extends AppCompatActivity {
     }
 
     public void setUI(){
+        responseUserID=null;
+        videoURL=null;
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         checkLogin(currentUser);
@@ -98,9 +94,28 @@ public class SendMovieActivity extends AppCompatActivity {
         }
 
         String userID = sharedPref.getString("setUserIDSendMovieActivity", "noSetUserStatus");
+        String userImageConfig = sharedPref.getString("setUserIconSendMovieActivity", "noSetUserStatus");
         if(userID != "noSetUserStatus") {
-            List<String> getFieldList = Arrays.asList("ThumbnailURL", "UserID", "UserName");
-            fireBaseRead("users", userID, getFieldList);
+            responseUserID = userID;
+            //List<String> getFieldList = Arrays.asList("ThumbnailURL", "UserID", "UserName");
+            //fireBaseRead("users", userID, getFieldList);
+        }
+
+        TextView userName = findViewById(R.id.setUserName);
+        TextView emailAddress = findViewById(R.id.setEmailAddress);
+        ImageView imageView = findViewById(R.id.userThumbnail);
+        if(userImageConfig.equals("satoruicon")){
+            imageView.setImageResource(R.drawable.satoruicon);
+            userName.setText("小林 慧");
+            emailAddress.setText("satorino0821@gmail.com");
+        }else if(userImageConfig.equals("sampleusericon")){
+            imageView.setImageResource(R.drawable.sampleusericon);
+            userName.setText("小林 さとり");
+            emailAddress.setText("satorino0821@yahoo.co.jp");
+        }else{
+            imageView.setImageResource(R.drawable.sampleusericon);
+            userName.setText("送信する友達を選択してください");
+            emailAddress.setText("");
         }
     }
 
@@ -176,7 +191,6 @@ public class SendMovieActivity extends AppCompatActivity {
             TextView textUserNameView=findViewById(R.id.text_user_name);
             textUserNameView.setText("MyUserName:"+myUserName);
             //↓その他全てのトピックを削除したい
-            FirebaseMessaging.getInstance().unsubscribeFromTopic(responseUserID);
             //自分のID名でFirebaseMessagingのトピック起動
             FirebaseMessaging.getInstance().subscribeToTopic(myUserID);
         }
@@ -196,32 +210,38 @@ public class SendMovieActivity extends AppCompatActivity {
         intent.putExtra("myUserID",myUserID);
         startActivity(intent);
     }
+    public void onClickLogout(View view){
+        signOut();
+    }
 
 
     public void onClickSendVideoButton(View view) {
-        if (!isClickEvent()) return;
-        Map<String, Object> request = new HashMap<>();
-        request.put("RequestUserName", myUserName);
-        request.put("RequestUserID", myUserID);
-        request.put("ResponseUserID", responseUserID);
-        request.put("VideoURL", videoURL);
+        if(responseUserID!=null&&videoURL!=null) {
+            if (!isClickEvent()) return;
+            Map<String, Object> request = new HashMap<>();
+            request.put("RequestUserName", myUserName);
+            request.put("RequestUserID", myUserID);
+            request.put("ResponseUserID", responseUserID);
+            request.put("VideoURL", videoURL);
 
-        //Firebaseの通信準備
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("request")
-        .add(request)
-        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                sendVideoRequest(documentReference.getId());
-            }
-        })
-        .addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w(TAG, "動画の送信に失敗：Error adding document", e);
-            }
-        });
+            //Firebaseの通信準備
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("request").add(request).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                @Override
+                public void onSuccess(DocumentReference documentReference) {
+                    sendVideoRequest(documentReference.getId());
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.w(TAG, "動画の送信に失敗：Error adding document", e);
+                }
+            });
+        }
+        else{
+            Context context = getApplicationContext();
+            Toast.makeText(context , "動画と友達の両方を選択してください", Toast.LENGTH_LONG).show();
+        }
     }
 
 
@@ -249,6 +269,8 @@ public class SendMovieActivity extends AppCompatActivity {
         };
         HttpRequestTask httpTask =new HttpRequestTask();
         httpTask.execute(mapData);
+        Context context = getApplicationContext();
+        Toast.makeText(context , "送信しました", Toast.LENGTH_LONG).show();
     }
 
     /** クリック連打制御時間(ミリ秒) */
@@ -260,12 +282,14 @@ public class SendMovieActivity extends AppCompatActivity {
      * クリックイベントが実行可能か判断する。
      * @return クリックイベントの実行可否 (true:可, false:否)
      */
-    public static boolean isClickEvent() {
+    public boolean isClickEvent() {
         // 現在時間を取得する
         long time = System.currentTimeMillis();
 
         // 一定時間経過していなければクリックイベント実行不可
         if (time - mOldClickTime < CLICK_DELAY) {
+            Context context = getApplicationContext();
+            Toast.makeText(context , "連続では送信できません", Toast.LENGTH_LONG).show();
             return false;
         }
         // 一定時間経過したらクリックイベント実行可能
@@ -283,9 +307,15 @@ public class SendMovieActivity extends AppCompatActivity {
         };
     }
 
-
     public void signOut() {
         firebaseAuth.signOut();
         LoginManager.getInstance().logOut();
+        SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor =  sharedPref.edit();
+        editor.clear().commit();
+        Intent intent = new Intent(this, LoginActivity.class);
+        //startActivityForResult(intent);
+        startActivity(intent);
+
     }
 }

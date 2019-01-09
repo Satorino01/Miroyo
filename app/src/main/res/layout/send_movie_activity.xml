@@ -118,7 +118,7 @@ tools:context=".SendMovieActivity">
                 android:orientation="horizontal">
 
                 <com.example.kobayashi_satoru.miroyo.SquareImageView
-                    android:id="@+id/userIcon"
+                    android:id="@+id/userThumbnail"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="8dp"
@@ -142,13 +142,12 @@ tools:context=".SendMovieActivity">
                         android:id="@+id/setUserName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="小林 慧" />
+                        android:text="送信する友達を選択してください" />
 
                     <TextView
                         android:id="@+id/setEmailAddress"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="satorino0821@gmail.com" />
+                        android:layout_height="wrap_content"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -189,6 +188,11 @@ tools:context=".SendMovieActivity">
             android:id="@+id/text_emailadress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:onClick="onClickLogout"
+            android:text="ログアウト"/>
     </LinearLayout>
 
     <View

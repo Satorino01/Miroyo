@@ -27,6 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -153,7 +154,7 @@ public class LoginActivity extends BaseActivity implements
             //userData.put("PhotoUrl", user.getPhotoUrl());
 
             // Add a new document with a generated ID
-            db.collection("users").document(user.getUid()).set(userData)
+            db.collection("users").document(user.getUid()).set(userData, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
