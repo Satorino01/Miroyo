@@ -5,4 +5,8 @@
     <color name="colorAccent">#D81B60</color>
     <color name="clearButtonPressed">#33000000</color>
     <color name="colorBlack">#000000</color>
+
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_300">#E0E0E0</color>
+    <color name="grey_500">#9E9E9E</color>
 </resources>
