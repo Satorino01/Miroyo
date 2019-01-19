@@ -31,7 +31,7 @@ public class SetMovieActivity extends AppCompatActivity {
     private DownloadTask downloadTask;
     private int buttonFormCounter = 0;
     private List videoIDs;
-    private HashMap videoMap;
+    private ArrayList videoMapArray = new ArrayList<HashMap>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +74,9 @@ public class SetMovieActivity extends AppCompatActivity {
                         if(collectionPath.equals("users")){
                             videoIDs = (List)document.get(getFieldList.get(0));
                             for(int i = 0 ; i < 2; i++){
-                                List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTime", "VideoName", "VideoURL");
+                                List<String> getVideoFieldList = Arrays.asList("ThumbnailURL", "PlayTime", "VideoName", "VideoURL");
                                 try {
-                                    fireBaseRead("video", videoIDs.get(i).toString(), getFieldList);
+                                    fireBaseRead("video", videoIDs.get(i).toString(), getVideoFieldList);
                                 }catch(Exception e){
                                     Log.d("Erroraaaaaaaaaa:",videoIDs.get(i).getClass().toString());
                                 }
@@ -85,7 +85,7 @@ public class SetMovieActivity extends AppCompatActivity {
                             for (String getKey : getFieldList) {
                                 resultMap.put(getKey, document.getString(getKey));
                             }
-                            videoMap = resultMap;
+                            videoMapArray.add(resultMap);
                             setVideoButton();
                         }
                     } else {
@@ -99,11 +99,10 @@ public class SetMovieActivity extends AppCompatActivity {
     }
 
     public void setVideoButton(){
-
         //アイコン画像のセット
         downloadTask = new DownloadTask();
         downloadTask.setListener(createListener());
-        downloadTask.execute(videoMap.get("ThumbnailURL").toString());
+        downloadTask.execute(((HashMap<String, Object>)videoMapArray.get(buttonFormCounter)).get("ThumbnailURL").toString());
     }
 
     private DownloadTask.Listener createListener() {
@@ -117,9 +116,9 @@ public class SetMovieActivity extends AppCompatActivity {
                         videoThumbnailView0.setImageBitmap(bmp);
                         //文字列のセット
                         TextView videoName0 = findViewById(R.id.videoName0);
-                        videoName0.setText(videoMap.get("VideoName").toString());
+                        videoName0.setText(((HashMap<String, Object>)videoMapArray.get(0)).get("VideoName").toString());
                         TextView videoPlayTime0 = findViewById(R.id.videoPlayTime0);
-                        videoPlayTime0.setText(videoMap.get("PlayTime").toString());
+                        videoPlayTime0.setText(((HashMap<String, Object>)videoMapArray.get(0)).get("PlayTime").toString());
                         break;
                     case 1:
                         //アイコンのセット
@@ -127,9 +126,9 @@ public class SetMovieActivity extends AppCompatActivity {
                         videoThumbnailView1.setImageBitmap(bmp);
                         //文字列のセット
                         TextView videoName1 = findViewById(R.id.videoName1);
-                        videoName1.setText(videoMap.get("VideoName").toString());
+                        videoName1.setText(((HashMap<String, Object>)videoMapArray.get(1)).get("VideoName").toString());
                         TextView videoPlayTime1 = findViewById(R.id.videoPlayTime1);
-                        videoPlayTime1.setText(videoMap.get("PlayTime").toString());
+                        videoPlayTime1.setText(((HashMap<String, Object>)videoMapArray.get(1)).get("PlayTime").toString());
                         break;
                     case 2:
                         break;
