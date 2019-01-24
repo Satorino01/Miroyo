@@ -6,11 +6,21 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,6 +40,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,7 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SendMovieActivity extends AppCompatActivity {
+public class SendMovieActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private String TAG = "SendMovieActivity";
     private String myUserID = "UnknownID";
@@ -49,6 +60,7 @@ public class SendMovieActivity extends AppCompatActivity {
     private String videoURL;
     private SendMovieViewModel sendMovieViewModel;
     private FirebaseAuth firebaseAuth;
+    private NavigationView navigationView;
 
     private static final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
 
@@ -59,14 +71,35 @@ public class SendMovieActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         //signOut();
         // ここで1秒間スリープし、スプラッシュを表示させたままにする。
-        setTheme(R.style.SplashTheme);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        setTheme(R.style.AppTheme);
+//        setTheme(R.style.SplashTheme);
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        setTheme(R.style.AppTheme);
         setContentView(R.layout.send_movie_activity);
+
+        //NavigationDrawer
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            }
+        });
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
 
@@ -108,7 +141,7 @@ public class SendMovieActivity extends AppCompatActivity {
             //List<String> getFieldList = Arrays.asList("ThumbnailURL", "UserID", "UserName");
             //fireBaseRead("users", userID, getFieldList);
         }
-        //TODO navigationDrawerに以降
+
         TextView userName = findViewById(R.id.setUserName);
         TextView emailAddress = findViewById(R.id.setEmailAddress);
         ImageView imageView = findViewById(R.id.userThumbnail);
@@ -222,13 +255,29 @@ public class SendMovieActivity extends AppCompatActivity {
         } else {
             myUserID = currentUser.getUid();
             myUserName = currentUser.getDisplayName();
-            TextView textID=findViewById(R.id.text_id);
-            textID.setText("MyID:"+currentUser.getUid());
-            TextView textEmailAdressView=findViewById(R.id.text_emailadress);
-            textEmailAdressView.setText("MyEmail:"+currentUser.getEmail());
-            TextView textUserNameView=findViewById(R.id.text_user_name);
-            textUserNameView.setText("MyUserName:"+myUserName);
-            //↓その他全てのトピックを削除したい
+            Uri myThumbnailURL = currentUser.getPhotoUrl();
+
+//            UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setPhotoUri(Uri.parse("https://scontent-nrt1-1.xx.fbcdn.net/v/t1.0-1/c0.0.319.319a/49899532_107467780342810_9021168769015218176_n.jpg?_nc_cat=108&_nc_ht=scontent-nrt1-1.xx&oh=2085d9420100b9d174c43b90f76a3c0e&oe=5CB786E2")).build();
+//            currentUser.updateProfile(userProfileChangeRequest);
+
+            ImageView myThumbnailImage = navigationView.getHeaderView(0).findViewById(R.id.myThumbnailImage);
+            RequestOptions options = new RequestOptions()
+                    .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
+                    .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
+                    .circleCrop()
+                    .override(200,200);
+            Glide.with(this).load(myThumbnailURL)
+                    .apply(options)
+                    .listener(createLoggerListener("video_thumbnail"))
+                    .into(myThumbnailImage);
+
+            TextView myUserNameTxt = navigationView.getHeaderView(0).findViewById(R.id.myNameTxt);
+            myUserNameTxt.setText(myUserName);
+
+            TextView myUserEmailAddressTxt = navigationView.getHeaderView(0).findViewById(R.id.myEmailAddressTxt);
+            myUserEmailAddressTxt.setText(currentUser.getEmail());
+
+            //TODO ↓その他全てのトピックを削除したい
             //自分のID名でFirebaseMessagingのトピック起動
             FirebaseMessaging.getInstance().subscribeToTopic(myUserID);
         }
@@ -248,10 +297,6 @@ public class SendMovieActivity extends AppCompatActivity {
         intent.putExtra("myUserID",myUserID);
         startActivity(intent);
     }
-    public void onClickLogout(View view){
-        signOut();
-    }
-
 
     public void onClickSendVideoButton(View view) {
         if(responseUserID!=null&&videoURL!=null) {
@@ -345,5 +390,62 @@ public class SendMovieActivity extends AppCompatActivity {
         //startActivityForResult(intent);
         startActivity(intent);
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.navigation_drawer, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+            signOut();
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
