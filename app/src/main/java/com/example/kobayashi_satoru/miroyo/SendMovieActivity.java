@@ -4,7 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +16,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.example.kobayashi_satoru.miroyo.ui.sendmovie.SendMovieViewModel;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -40,7 +49,6 @@ public class SendMovieActivity extends AppCompatActivity {
     private String videoURL;
     private SendMovieViewModel sendMovieViewModel;
     private FirebaseAuth firebaseAuth;
-    private DownloadTask downloadTask;
 
     private static final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
 
@@ -90,7 +98,7 @@ public class SendMovieActivity extends AppCompatActivity {
         //videoID = "3C37gFJYWl3EsCkUw8fV";
         if(videoID != "noSetVideoStatus") {
             List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTime", "VideoName", "VideoURL");
-            fireBaseRead("video", videoID, getFieldList);
+            fireBaseRead("videos", videoID, getFieldList);
         }
 
         String userID = sharedPref.getString("setUserIDSendMovieActivity", "noSetUserStatus");
@@ -100,7 +108,7 @@ public class SendMovieActivity extends AppCompatActivity {
             //List<String> getFieldList = Arrays.asList("ThumbnailURL", "UserID", "UserName");
             //fireBaseRead("users", userID, getFieldList);
         }
-
+        //TODO navigationDrawerに以降
         TextView userName = findViewById(R.id.setUserName);
         TextView emailAddress = findViewById(R.id.setEmailAddress);
         ImageView imageView = findViewById(R.id.userThumbnail);
@@ -134,7 +142,7 @@ public class SendMovieActivity extends AppCompatActivity {
                             resultMap.put(getKey,document.getString(getKey));
                             Log.d(TAG,"AAAAAAAAA"+getKey+":"+document.getString(getKey));
                         }
-                        if(collectionPath.equals("video")){
+                        if(collectionPath.equals("videos")){
                             setVideoButton(resultMap);
                         }else if(collectionPath.equals("users")){
                             setUserButton(resultMap);
@@ -151,17 +159,47 @@ public class SendMovieActivity extends AppCompatActivity {
 
     public void setVideoButton(HashMap videoMap){
         //アイコン画像のセット
-        downloadTask = new DownloadTask();
-        downloadTask.setListener(createListener());
-        downloadTask.execute(videoMap.get("ThumbnailURL").toString());
+        ImageView sendVideoThumbnail = findViewById(R.id.sendVideoThumbnail);
+        RequestOptions options = new RequestOptions()
+                .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
+                .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
+                .override(300,300);
+        Glide.with(this).load(videoMap.get("ThumbnailURL").toString())
+                .apply(options)
+                .listener(createLoggerListener("video_thumbnail"))
+                .into(sendVideoThumbnail);
         //動画テキストのセット
-        TextView videoName = findViewById(R.id.videoName);
-        videoName.setText(videoMap.get("VideoName").toString());
-        TextView videoPlayTime = findViewById(R.id.videoPlayTime);
-        videoPlayTime.setText(videoMap.get("PlayTime").toString());
+        TextView videoNameTxt = findViewById(R.id.sendVideoName);
+        videoNameTxt.setText(videoMap.get("VideoName").toString());
+        TextView videoPlayTimeTxt = findViewById(R.id.sendVideoPlayTime);
+        videoPlayTimeTxt.setText(videoMap.get("PlayTime").toString());
         //videoURLのセット
         videoURL = videoMap.get("VideoURL").toString();
 
+    }
+
+    private RequestListener<Drawable> createLoggerListener(final String match_image) {
+        return new RequestListener<Drawable>(){
+
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
+                if (resource instanceof BitmapDrawable) {
+                    Bitmap bitmap = ((BitmapDrawable) resource).getBitmap();
+                    Log.d("GlideApp",
+                            String.format("Ready %s bitmap %,d bytes, size: %d x %d",
+                                    match_image,
+                                    bitmap.getByteCount(),
+                                    bitmap.getWidth(),
+                                    bitmap.getHeight()));
+                }
+                return false;
+            }
+        };
     }
 
 
@@ -226,7 +264,7 @@ public class SendMovieActivity extends AppCompatActivity {
 
             //Firebaseの通信準備
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("request").add(request).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            db.collection("requests").add(request).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                 @Override
                 public void onSuccess(DocumentReference documentReference) {
                     sendVideoRequest(documentReference.getId());
@@ -295,16 +333,6 @@ public class SendMovieActivity extends AppCompatActivity {
         // 一定時間経過したらクリックイベント実行可能
         mOldClickTime = time;
         return true;
-    }
-
-    private DownloadTask.Listener createListener() {
-        return new DownloadTask.Listener() {
-            @Override
-            public void onSuccess(Bitmap bmp) {
-                SquareImageView videoThumbnailView = findViewById(R.id.videoThumbnail);
-                videoThumbnailView.setImageBitmap(bmp);
-            }
-        };
     }
 
     public void signOut() {

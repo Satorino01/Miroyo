@@ -27,440 +27,78 @@
         android:background="@android:color/darker_gray"
         app:layout_constraintTop_toBottomOf="@+id/choiceMovieTextView"/>
 
-    <ScrollView
-        android:id="@+id/videoScrollView"
+    <android.support.constraint.ConstraintLayout
+
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:gravity="top"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/actionTable"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/underLine2">
 
-        <LinearLayout
-            android:id="@+id/videoLinearLayout"
-            android:orientation="vertical"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/videoRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-            <FrameLayout
-                android:id="@+id/video_frame0"
-                android:layout_width="match_parent"
-                android:layout_height="88dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="0dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/shape_rounded_corners_5dp">
-
-                <Button
-                    android:id="@+id/choiceVideoButton0"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/clear_button_bg"
-                    android:onClick="onClickVideo0" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="start"
-                    android:weightSum="1"
-                    android:orientation="horizontal">
-
-                    <com.example.kobayashi_satoru.miroyo.SquareImageView
-                        android:id="@+id/videoThumbnail0"
-                        android:layout_weight="0.2"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/samplemoviethumbnail" />
-
-                    <LinearLayout
-                        android:layout_weight="0.8"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/videoName0"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="UNKNOWN" />
-
-                        <TextView
-                            android:id="@+id/videoPlayTime0"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="00:00" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </FrameLayout>
-            <FrameLayout
-                android:id="@+id/video_frame1"
-                android:layout_width="match_parent"
-                android:layout_height="88dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="0dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/shape_rounded_corners_5dp">
-
-                <Button
-                    android:id="@+id/choiceVideoButton1"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/clear_button_bg"
-                    android:onClick="onClickVideo1"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="start"
-                    android:orientation="horizontal">
-
-                    <com.example.kobayashi_satoru.miroyo.SquareImageView
-                        android:id="@+id/videoThumbnail1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/samplemoviethumbnail" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/videoName1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="UNKNOWN" />
-
-                        <TextView
-                            android:id="@+id/videoPlayTime1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="00:00" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </FrameLayout>
-            <FrameLayout
-                android:id="@+id/video_frame2"
-                android:layout_width="match_parent"
-                android:layout_height="88dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="0dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/shape_rounded_corners_5dp">
-
-                <Button
-                    android:id="@+id/choiceVideoButton2"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/clear_button_bg"
-                    android:onClick="onClickVideo2"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="start"
-                    android:orientation="horizontal">
-
-                    <com.example.kobayashi_satoru.miroyo.SquareImageView
-                        android:id="@+id/videoThumbnail2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/samplemoviethumbnail" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/videoName2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="UNKNOWN" />
-
-                        <TextView
-                            android:id="@+id/videoPlayTime2"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="00:00" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </FrameLayout>
-            <FrameLayout
-                android:id="@+id/video_frame3"
-                android:layout_width="match_parent"
-                android:layout_height="88dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="0dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/shape_rounded_corners_5dp">
-
-                <Button
-                    android:id="@+id/choiceVideoButton3"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/clear_button_bg"
-                    android:onClick="onClickVideo3"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="start"
-                    android:orientation="horizontal">
-
-                    <com.example.kobayashi_satoru.miroyo.SquareImageView
-                        android:id="@+id/videoThumbnail3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/samplemoviethumbnail" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/videoName3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="UNKNOWN" />
-
-                        <TextView
-                            android:id="@+id/videoPlayTime3"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="00:00" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </FrameLayout>
-            <FrameLayout
-                android:id="@+id/video_frame4"
-                android:layout_width="match_parent"
-                android:layout_height="88dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="0dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/shape_rounded_corners_5dp">
-
-                <Button
-                    android:id="@+id/choiceVideoButton4"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/clear_button_bg"
-                    android:onClick="onClickVideo4"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="start"
-                    android:orientation="horizontal">
-
-                    <com.example.kobayashi_satoru.miroyo.SquareImageView
-                        android:id="@+id/videoThumbnail4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/samplemoviethumbnail" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/videoName4"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="UNKNOWN" />
-
-                        <TextView
-                            android:id="@+id/videoPlayTime4"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="00:00" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </FrameLayout>
-            <FrameLayout
-                android:id="@+id/video_frame5"
-                android:layout_width="match_parent"
-                android:layout_height="88dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="0dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/shape_rounded_corners_5dp">
-
-                <Button
-                    android:id="@+id/choiceVideoButton5"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/clear_button_bg"
-                    android:onClick="onClickVideo5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="start"
-                    android:orientation="horizontal">
-
-                    <com.example.kobayashi_satoru.miroyo.SquareImageView
-                        android:id="@+id/videoThumbnail05"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/samplemoviethumbnail" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/videoName5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="UNKNOWN" />
-
-                        <TextView
-                            android:id="@+id/videoPlayTime5"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="00:00" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </FrameLayout>
-        </LinearLayout>
-    </ScrollView>
+    </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/actionTable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="32dp"
         android:layout_marginBottom="32dp"
+        android:gravity="left"
         android:orientation="horizontal"
         android:weightSum="1"
-        android:gravity="left"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
+
         <FrameLayout
             android:layout_width="0dp"
-            android:layout_weight="0.7"
             android:layout_height="match_parent"
-            android:layout_marginTop="0dp"
             android:layout_marginLeft="0dp"
+            android:layout_marginTop="0dp"
             android:layout_marginRight="32dp"
             android:layout_marginBottom="0dp"
+            android:layout_weight="0.7"
             android:background="@drawable/shape_rounded_corners_5dp">
+
             <Button
                 android:id="@+id/choice_button"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="動画のアップロード"
-                android:background="@drawable/clear_button_bg"/>
+                android:background="@drawable/clear_button_bg"
+                android:text="動画のアップロード" />
         </FrameLayout>
+
         <FrameLayout
             android:layout_width="0dp"
-            android:layout_weight="0.3"
             android:layout_height="match_parent"
-            android:layout_marginTop="0dp"
             android:layout_marginLeft="0dp"
+            android:layout_marginTop="0dp"
             android:layout_marginRight="0dp"
             android:layout_marginBottom="0dp"
+            android:layout_weight="0.3"
             android:background="@drawable/shape_rounded_corners_5dp">
+
             <Button
                 android:id="@+id/return_button"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="0dp"
-                android:text="戻る"
                 android:background="@drawable/clear_button_bg"
-                android:onClick="onClickReturnButton"/>
+                android:onClick="onClickReturnButton"
+                android:text="戻る" />
         </FrameLayout>
     </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

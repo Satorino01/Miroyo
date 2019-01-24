@@ -23,19 +23,20 @@ public class PlayVideoActivity extends AppCompatActivity {
     ProgressDialog progressDialog;
 
     String videoName = "https://storage.googleapis.com/miroyo.appspot.com/failure_cat.mp4";
+    String requestID;
     String requestUserName = null;
-
+    FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.play_video_activity);
         Intent intent = getIntent();
-        final String requestID = intent.getStringExtra("requestID");
+        requestID = intent.getStringExtra("requestID");
 
         videoView = findViewById(R.id.videoView);
-        final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("request").document(requestID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        db = FirebaseFirestore.getInstance();
+        db.collection("requests").document(requestID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 requestUserName = task.getResult().get("RequestUserName").toString();
@@ -65,7 +66,7 @@ public class PlayVideoActivity extends AppCompatActivity {
                     @Override
                     public void onCompletion(MediaPlayer mediaPlayer) {
 
-                        db.collection("request").document(requestID).delete();
+                        db.collection("requests").document(requestID).delete();
 
                         if(mediaPlayer!=null) {
                             if(mediaPlayer.isPlaying())
@@ -82,7 +83,7 @@ public class PlayVideoActivity extends AppCompatActivity {
                     @Override
                     public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
                         progressDialog.dismiss();
-                        db.collection("request").document(requestID).delete();
+                        db.collection("requests").document(requestID).delete();
                         if(mediaPlayer!=null) {
                             if(mediaPlayer.isPlaying())
                                 mediaPlayer.stop();
@@ -105,6 +106,7 @@ public class PlayVideoActivity extends AppCompatActivity {
         progressDialog.setButton("受信拒否", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                db.collection("requests").document(requestID).delete();
                 progressDialog.dismiss();
                 finishAndRemoveTask();
             }
@@ -115,8 +117,10 @@ public class PlayVideoActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        videoView.stopPlayback();
         finishAndRemoveTask();
     }
+
     private void repeatVideo(){
         //リピートする場合
         // 先頭に戻す
