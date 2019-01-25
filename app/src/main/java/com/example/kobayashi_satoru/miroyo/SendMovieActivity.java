@@ -45,6 +45,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,8 +55,8 @@ import java.util.Map;
 public class SendMovieActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private String TAG = "SendMovieActivity";
-    private String myUserID = "UnknownID";
-    private String myUserName = "UnknownName";
+    private String myUserID;
+    private String myUserName;
     private String responseUserID;
     private String videoURL;
     private SendMovieViewModel sendMovieViewModel;
@@ -126,14 +127,14 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         // 設定ファイルを開きます。
         SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
 
-        //アイコンや文字列のセット
+        //動画アイテムのセット
         String videoID = sharedPref.getString("setVideoIDSendMovieActivity", "noSetVideoStatus");
-        //videoID = "3C37gFJYWl3EsCkUw8fV";
         if(videoID != "noSetVideoStatus") {
             List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTime", "VideoName", "VideoURL");
             fireBaseRead("videos", videoID, getFieldList);
         }
 
+        //フレンドアイテムのセット
         String userID = sharedPref.getString("setUserIDSendMovieActivity", "noSetUserStatus");
         String userImageConfig = sharedPref.getString("setUserIconSendMovieActivity", "noSetUserStatus");
         if(userID != "noSetUserStatus") {
@@ -141,7 +142,6 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
             //List<String> getFieldList = Arrays.asList("ThumbnailURL", "UserID", "UserName");
             //fireBaseRead("users", userID, getFieldList);
         }
-
         TextView userName = findViewById(R.id.setUserName);
         TextView emailAddress = findViewById(R.id.setEmailAddress);
         ImageView imageView = findViewById(R.id.userThumbnail);
@@ -190,8 +190,8 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         });
     }
 
+    //アイコン画像のセット
     public void setVideoButton(HashMap videoMap){
-        //アイコン画像のセット
         ImageView sendVideoThumbnail = findViewById(R.id.sendVideoThumbnail);
         RequestOptions options = new RequestOptions()
                 .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
@@ -208,7 +208,6 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         videoPlayTimeTxt.setText(videoMap.get("PlayTime").toString());
         //videoURLのセット
         videoURL = videoMap.get("VideoURL").toString();
-
     }
 
     private RequestListener<Drawable> createLoggerListener(final String match_image) {
