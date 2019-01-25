@@ -16,7 +16,15 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 
+import static android.provider.Settings.System.getString;
+
 public final class HttpRequestTask extends AsyncTask<HashMap, Void, Void> {
+
+    private String apiKey;
+
+    HttpRequestTask(String apikey){
+        apiKey = apikey;
+    }
 
     @Override
     protected Void doInBackground(HashMap... params) {
@@ -43,7 +51,7 @@ public final class HttpRequestTask extends AsyncTask<HashMap, Void, Void> {
             //ヘッダーにContent-Typeを設定する
             urlConnection.addRequestProperty("Content-Type", "application/json");
             //ヘッダーにContent-Typeを設定する
-            urlConnection.addRequestProperty("Authorization","key=AAAAbHcEneY:APA91bEGxZ7oiHiF4KFeD9LgFkL_MHPoipGcdylbx7Rz6vF8PXpEQGnpkrJlhiyApF-2CWei1-QvtTk5ahquTlxH-tBMB5n9p_NYCj5i2l8AIZ6SQAWmGAjUY05rDeGxxgn5Osc3hDKv");
+            urlConnection.addRequestProperty("Authorization","key=" + apiKey);
             //HTTPのメソッドをPOSTに設定する。
             urlConnection.setRequestMethod("POST");
             //リクエストのボディ送信を許可する

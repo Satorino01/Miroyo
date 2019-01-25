@@ -349,7 +349,7 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
                 put("data", data);
             }
         };
-        HttpRequestTask httpTask =new HttpRequestTask();
+        HttpRequestTask httpTask = new HttpRequestTask(getString(R.string.FireStoreAPIkey));
         httpTask.execute(mapData);
         Context context = getApplicationContext();
         Toast.makeText(context , "送信しました", Toast.LENGTH_LONG).show();
