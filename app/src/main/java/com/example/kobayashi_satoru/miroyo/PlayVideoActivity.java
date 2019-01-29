@@ -23,8 +23,10 @@ public class PlayVideoActivity extends AppCompatActivity {
     ProgressDialog progressDialog;
 
     String videoName = "https://storage.googleapis.com/miroyo.appspot.com/failure_cat.mp4";
+
     String requestID;
-    String requestUserName = null;
+    String requestUserName;
+
     FirebaseFirestore db;
 
     @Override

@@ -42,30 +42,22 @@ public class LoginActivity extends BaseActivity implements
 
     private TextView mStatusTextView;
     private TextView mDetailTextView;
-
-    // [認証を開始]
     private FirebaseAuth firebaseAuth;
-    // [認証を終了]
-
     private CallbackManager mCallbackManager;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Views
         mStatusTextView = findViewById(R.id.status);
         mDetailTextView = findViewById(R.id.detail);
         findViewById(R.id.buttonFacebookSignout).setOnClickListener(this);
 
-        // [認証の初期化を開始]
-        //Firebase認証を初期化する
         firebaseAuth = FirebaseAuth.getInstance();
-        // [認証の初期化を終了]
 
-        // [fbloginの初期化を開始]
-        //Facebookログインの初期化ボタン
+        //Facebookログインボタン
         mCallbackManager = CallbackManager.Factory.create();
         LoginButton loginButton = findViewById(R.id.buttonFacebookLogin);
         loginButton.setReadPermissions("email", "public_profile");
@@ -96,6 +88,8 @@ public class LoginActivity extends BaseActivity implements
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        //UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setPhotoUri(Uri.parse("https://scontent-nrt1-1.xx.fbcdn.net/v/t1.0-1/c0.0.319.319a/49899532_107467780342810_9021168769015218176_n.jpg?_nc_cat=108&_nc_ht=scontent-nrt1-1.xx&oh=2085d9420100b9d174c43b90f76a3c0e&oe=5CB786E2")).build();
+        //currentUser.updateProfile(userProfileChangeRequest);
         updateUI(currentUser);
     }
     @Override
@@ -135,7 +129,6 @@ public class LoginActivity extends BaseActivity implements
     public void signOut() {
         firebaseAuth.signOut();
         LoginManager.getInstance().logOut();
-
         updateUI(null);
     }
 
@@ -158,7 +151,12 @@ public class LoginActivity extends BaseActivity implements
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                finish();
+                            }
+                        }).start();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -167,7 +165,6 @@ public class LoginActivity extends BaseActivity implements
                         Log.w(TAG, "Error adding document", e);
                     }
                 });
-            finish();
         } else {
             mStatusTextView.setText(R.string.signed_out);
             mDetailTextView.setText(null);

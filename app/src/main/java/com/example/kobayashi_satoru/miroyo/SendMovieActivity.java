@@ -54,55 +54,36 @@ import java.util.Map;
 
 public class SendMovieActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
+    private final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
     private String TAG = "SendMovieActivity";
+
     private String myUserID;
     private String myUserName;
-    private String responseUserID;
+
     private String videoURL;
-    private SendMovieViewModel sendMovieViewModel;
+
+    private String responseUserID;
+
     private FirebaseAuth firebaseAuth;
     private NavigationView navigationView;
-
-    private static final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //FirebaseAuthの初期設定
         firebaseAuth = FirebaseAuth.getInstance();
-        //signOut();
+
+        //TODO スプラッシュ画面追加、ちゃんとNoActionbarなThemeにしないと落ちる。
         // ここで1秒間スリープし、スプラッシュを表示させたままにする。
-//        setTheme(R.style.SplashTheme);
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        setTheme(R.style.AppTheme);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.send_movie_activity);
-
-        //NavigationDrawer
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
-
 
     @Override
     public void onStart() {
@@ -114,13 +95,13 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
     @Override
     public void onRestart() {
         super.onRestart();
-        setUI();
     }
 
     public void setUI(){
+
         responseUserID=null;
         videoURL=null;
-        // Check if user is signed in (non-null) and update UI accordingly.
+
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         checkLogin(currentUser);
 
@@ -131,7 +112,7 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         String videoID = sharedPref.getString("setVideoIDSendMovieActivity", "noSetVideoStatus");
         if(videoID != "noSetVideoStatus") {
             List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTime", "VideoName", "VideoURL");
-            fireBaseRead("videos", videoID, getFieldList);
+            fetchValueFirestore("videos", videoID, getFieldList);
         }
 
         //フレンドアイテムのセット
@@ -158,10 +139,45 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
             userName.setText("送信する友達を選択してください");
             emailAddress.setText("");
         }
+
+        //NavigationDrawerのセット
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        FloatingActionButton floatingActionButton = findViewById(R.id.fab);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            }
+        });
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        Uri myThumbnailURL = currentUser.getPhotoUrl();
+        ImageView myThumbnailImage = navigationView.getHeaderView(0).findViewById(R.id.myThumbnailImage);
+        RequestOptions options = new RequestOptions()
+                .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
+                .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
+                .circleCrop()
+                .override(200,200);
+        Glide.with(this).load(myThumbnailURL)
+                .apply(options)
+                .listener(createLoggerListener("video_thumbnail"))
+                .into(myThumbnailImage);
+
+        TextView myUserNameTxt = navigationView.getHeaderView(0).findViewById(R.id.myNameTxt);
+        myUserNameTxt.setText(myUserName);
+        TextView myUserEmailAddressTxt = navigationView.getHeaderView(0).findViewById(R.id.myEmailAddressTxt);
+        myUserEmailAddressTxt.setText(currentUser.getEmail());
+
     }
 
 
-    public void fireBaseRead(final String collectionPath, String ID, final List<String> getFieldList) {
+    public void fetchValueFirestore(final String collectionPath, String ID, final List<String> getFieldList) {
         final HashMap resultMap = new HashMap();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection(collectionPath).document(ID);
@@ -190,7 +206,6 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         });
     }
 
-    //アイコン画像のセット
     public void setVideoButton(HashMap videoMap){
         ImageView sendVideoThumbnail = findViewById(R.id.sendVideoThumbnail);
         RequestOptions options = new RequestOptions()
@@ -208,6 +223,16 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         videoPlayTimeTxt.setText(videoMap.get("PlayTime").toString());
         //videoURLのセット
         videoURL = videoMap.get("VideoURL").toString();
+    }
+
+    public void setUserButton(HashMap userMap){
+
+        //responseUserIDのセット
+        //アイコン画像のセットを書く
+//            task = new DownloadTask();
+//            task.setListener(createListener());
+//            task.execute("https://storage.googleapis.com/miroyo.appspot.com/01.png");
+
     }
 
     private RequestListener<Drawable> createLoggerListener(final String match_image) {
@@ -234,18 +259,6 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         };
     }
 
-
-    public void setUserButton(HashMap userMap){
-
-        //responseUserIDのセット
-        //アイコン画像のセットを書く
-//            task = new DownloadTask();
-//            task.setListener(createListener());
-//            task.execute("https://storage.googleapis.com/miroyo.appspot.com/01.png");
-
-    }
-
-
     public void checkLogin(FirebaseUser currentUser){
         if (currentUser == null) {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -254,27 +267,6 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         } else {
             myUserID = currentUser.getUid();
             myUserName = currentUser.getDisplayName();
-            Uri myThumbnailURL = currentUser.getPhotoUrl();
-
-//            UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setPhotoUri(Uri.parse("https://scontent-nrt1-1.xx.fbcdn.net/v/t1.0-1/c0.0.319.319a/49899532_107467780342810_9021168769015218176_n.jpg?_nc_cat=108&_nc_ht=scontent-nrt1-1.xx&oh=2085d9420100b9d174c43b90f76a3c0e&oe=5CB786E2")).build();
-//            currentUser.updateProfile(userProfileChangeRequest);
-
-            ImageView myThumbnailImage = navigationView.getHeaderView(0).findViewById(R.id.myThumbnailImage);
-            RequestOptions options = new RequestOptions()
-                    .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
-                    .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
-                    .circleCrop()
-                    .override(200,200);
-            Glide.with(this).load(myThumbnailURL)
-                    .apply(options)
-                    .listener(createLoggerListener("video_thumbnail"))
-                    .into(myThumbnailImage);
-
-            TextView myUserNameTxt = navigationView.getHeaderView(0).findViewById(R.id.myNameTxt);
-            myUserNameTxt.setText(myUserName);
-
-            TextView myUserEmailAddressTxt = navigationView.getHeaderView(0).findViewById(R.id.myEmailAddressTxt);
-            myUserEmailAddressTxt.setText(currentUser.getEmail());
 
             //TODO ↓その他全てのトピックを削除したい
             //自分のID名でFirebaseMessagingのトピック起動
