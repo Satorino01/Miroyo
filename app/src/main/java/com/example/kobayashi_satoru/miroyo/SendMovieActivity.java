@@ -98,7 +98,6 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void setUI(){
-
         responseUserID=null;
         videoURL=null;
 
@@ -108,6 +107,7 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         // 設定ファイルを開きます。
         SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
 
+        //TODO VideoオブジェクトとUserオブジェクトでセット
         //動画アイテムのセット
         String videoID = sharedPref.getString("setVideoIDSendMovieActivity", "noSetVideoStatus");
         if(videoID != "noSetVideoStatus") {
@@ -374,6 +374,7 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
     public void signOut() {
         firebaseAuth.signOut();
         LoginManager.getInstance().logOut();
+        //TODO 他のアカウントでLoginしたときID情報が残っているとやべえし、時間が経ってログアウトして別垢でログインしなおしたらバグる
         SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor =  sharedPref.edit();
         editor.clear().commit();
