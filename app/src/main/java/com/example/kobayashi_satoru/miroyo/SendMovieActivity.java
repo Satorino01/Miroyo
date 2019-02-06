@@ -70,12 +70,7 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //FirebaseAuthの初期設定
-        firebaseAuth = FirebaseAuth.getInstance();
-
-        //TODO スプラッシュ画面追加、ちゃんとNoActionbarなThemeにしないと落ちる。
-        // ここで1秒間スリープし、スプラッシュを表示させたままにする。
+        // ここで1秒間スリープし、スプラッシュを表示させたままにする。ちゃんとNoActionbarなThemeにしないと落ちる。
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -88,21 +83,30 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
     @Override
     public void onStart() {
         super.onStart();
-        setUI();
-    }
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (checkLogin(currentUser)) {
+            myUserID = currentUser.getUid();
+            myUserName = currentUser.getDisplayName();
 
+            //TODO ↓自分のID名以外の全てのトピックを削除したい
+            //自分のID名でFirebaseMessagingのトピック起動
+            FirebaseMessaging.getInstance().subscribeToTopic(myUserID);
+            setUI(currentUser);
+        } else {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);//startActivityForResult(intent);
+        }
+    }
 
     @Override
     public void onRestart() {
         super.onRestart();
     }
 
-    public void setUI(){
+    public void setUI(FirebaseUser currentUser){
         responseUserID=null;
         videoURL=null;
-
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        checkLogin(currentUser);
 
         // 設定ファイルを開きます。
         SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
@@ -173,7 +177,6 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         myUserNameTxt.setText(myUserName);
         TextView myUserEmailAddressTxt = navigationView.getHeaderView(0).findViewById(R.id.myEmailAddressTxt);
         myUserEmailAddressTxt.setText(currentUser.getEmail());
-
     }
 
 
@@ -259,18 +262,11 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         };
     }
 
-    public void checkLogin(FirebaseUser currentUser){
+    public boolean checkLogin(FirebaseUser currentUser){
         if (currentUser == null) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            //startActivityForResult(intent);
-            startActivity(intent);
+            return false;
         } else {
-            myUserID = currentUser.getUid();
-            myUserName = currentUser.getDisplayName();
-
-            //TODO ↓その他全てのトピックを削除したい
-            //自分のID名でFirebaseMessagingのトピック起動
-            FirebaseMessaging.getInstance().subscribeToTopic(myUserID);
+            return true;
         }
     }
 

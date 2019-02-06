@@ -73,10 +73,11 @@
             android:background="@drawable/shape_rounded_corners_5dp">
 
             <Button
-                android:id="@+id/choice_button"
+                android:id="@+id/createVideoItemButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/clear_button_bg"
+                android:onClick="onClickCreateVideoItemButton"
                 android:text="動画のアップロード" />
         </FrameLayout>
 

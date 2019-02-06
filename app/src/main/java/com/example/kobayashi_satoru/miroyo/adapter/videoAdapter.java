@@ -83,18 +83,11 @@ public class videoAdapter extends RecyclerView.Adapter {
         videoHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //listener.onClick(view, nameList.get(holder.getAdapterPosition()));
-                Toast toast = Toast.makeText(mContext,"テスト" + Integer.toString(position), Toast.LENGTH_SHORT);
-                toast.show();
-                Log.d("aaaaaaaaaaaaaaaaaa","テスト" + Integer.toString(position));
-
-
-
                 SharedPreferences sharedPref = mContext.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor =  sharedPref.edit();
                 editor.putString("setVideoIDSendMovieActivity", videoIDs.get(position).toString());
                 editor.apply();
-                mListener.onRecyclerClicked(view, position);//finish()
+                mListener.onRecyclerClicked(view, position);
             }
         });
     }
@@ -131,7 +124,6 @@ public class videoAdapter extends RecyclerView.Adapter {
             return 0;
         }
     }
-
 
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
