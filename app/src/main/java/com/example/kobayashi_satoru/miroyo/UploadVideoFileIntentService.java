@@ -31,10 +31,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class UploadVideoFileIntentService extends IntentService {
     // TODO: アクションの名前を変更し、そのタスクを説明するアクション名を選択してください。
-    private static final String ACTION_UploadVideo = "com.example.kobayashi_satoru.miroyo.action.UploadVideo";
+    private final String ACTION_UploadVideo = "com.example.kobayashi_satoru.miroyo.action.UploadVideo";
+    private final CountDownLatch countDownLatch = new CountDownLatch(3);
+    private String videoID;
+    private String videoURL;
+    private String videoThumbnailURL;
+    private int videoPlayTime;
 
     public UploadVideoFileIntentService() {
         super("UploadVideoFileIntentService");
@@ -60,8 +66,8 @@ public class UploadVideoFileIntentService extends IntentService {
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         for (final String filePass : filesPass){
-            Uri videoFileUri = Uri.fromFile(new File(filePass));
-            String videoFileName = videoFileUri.getLastPathSegment();
+            final Uri videoFileUri = Uri.fromFile(new File(filePass));
+            final String videoFileName = videoFileUri.getLastPathSegment();
 
             Map<String, Object> video = new HashMap();
             video.put("VideoName", videoFileName);
@@ -70,7 +76,16 @@ public class UploadVideoFileIntentService extends IntentService {
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>(){
                         @Override
                         public void onSuccess(DocumentReference documentReference) {
-                            PutVideoThumbnailFirebaseStorage(db, filePass , documentReference.getId());
+
+                            FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+                            final StorageReference storageRef = firebaseStorage.getReference();
+                            videoID = documentReference.getId();
+
+                            PutVideoThumbnailFirebaseStorage(storageRef, videoFileName, filePass, videoID);
+                            PutVideoFirebaseStorage(storageRef, videoFileName, videoFileUri, filePass, videoID);
+                            videoPlayTime = fetchPlayTime(videoFileUri);//動画の再生時間を取得
+                            Log.d("onHandleIntent","PlayTime:"+String.valueOf(videoPlayTime));
+                            countDownLatch.countDown();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -80,28 +95,35 @@ public class UploadVideoFileIntentService extends IntentService {
                             //progressDialog.hide();
                         }
                     });
+            try {
+                countDownLatch.await();//動画ファイルと動画のサムネファイルのアップロードが終わるまで待機
+                Log.d("onHandleIntent","非同期処理の統合成功！！");
+                Log.d("onHandleIntent","VideoURL"+videoURL);
+                Log.d("onHandleIntent","VideoThumbnailURL"+videoThumbnailURL);
+                WriteVideosFireStore(db, videoID, videoFileName, videoURL, videoThumbnailURL, videoPlayTime);
+            } catch (InterruptedException e) {
+                Log.d("onHandleIntent","非同期処理の待ち合わせ失敗！！");
+                e.printStackTrace();
+            }
         }
     }
 
-    public void PutVideoThumbnailFirebaseStorage(final FirebaseFirestore db, final String filePass, final String videoID){
+    public void PutVideoThumbnailFirebaseStorage(StorageReference storageRef, String videoFileName, final String filePass, final String videoID){
+        Log.d("onHandleIntent","Videoサムネ画像のアップロード開始");
         //動画のサムネ画像を Firebase ストレージ に保存して URL を取得
         Bitmap videoThumbnail = ThumbnailUtils.createVideoThumbnail(filePass, MediaStore.Images.Thumbnails.MINI_KIND);//(512×384)
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         videoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
 
-        Uri videoFile = Uri.fromFile(new File(filePass));
         String thumbnailFileName = null;
         if (filePass.endsWith(".mp4")) {
-            thumbnailFileName = videoFile.getLastPathSegment().replaceAll(".mp4", ".jpg");//ファイル名の.mp4を.jpgに変換 TODO webmなどにも対応
+            thumbnailFileName = videoFileName.replaceAll(".mp4", ".jpg");//ファイル名の.mp4を.jpgに変換 TODO webmなどにも対応
         } else if (filePass.endsWith(".webm")){
-            thumbnailFileName = videoFile.getLastPathSegment().replaceAll(".webm", ".jpg");
+            thumbnailFileName = videoFileName.replaceAll(".webm", ".jpg");
         } else {
             //TODO 例外処理
         }
-
-        FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
-        final StorageReference storageRef = firebaseStorage.getReference();
 
         final StorageReference videoThumbnailsRef = storageRef
                 .child("videoThumbnails/" + videoID + thumbnailFileName);//ランダム変数追加
@@ -120,21 +142,20 @@ public class UploadVideoFileIntentService extends IntentService {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
-                    Uri downloadUri = task.getResult();
-                    Log.d("ダウンロードに使えるURL",task.getResult().toString());
-                    PutVideoFirebaseStorage(db, storageRef, filePass, task.getResult().toString(), videoID);
-                } else {
-
+                    videoThumbnailURL = task.getResult().toString();
+                    Log.d("onHandleIntent","Videoサムネ画像のアップロード完了");
+                    countDownLatch.countDown();
+                }else{
+                    Log.d("onHandleIntent","Videoサムネ画像のアップロード失敗いいいいいいいい");
                 }
             }
         });
     }
 
-    public void PutVideoFirebaseStorage(final FirebaseFirestore db, StorageReference storageRef, String filePass, final String videoThumbnailURL, final String videoID) {
-        final Uri videoFile = Uri.fromFile(new File(filePass));
-        final StorageReference videosRef = storageRef.child("videos/" + videoID + videoFile.getLastPathSegment());
-        final String videoName = videoFile.getLastPathSegment();
-        UploadTask uploadVideoTask = videosRef.putFile(videoFile);
+    public void PutVideoFirebaseStorage(StorageReference storageRef, String videoFileName, Uri videoFileUri, String filePass, final String videoID) {
+        Log.d("onHandleIntent","Videoファイルのアップロード開始");
+        final StorageReference videosRef = storageRef.child("videos/" + videoID + videoFileName);
+        UploadTask uploadVideoTask = videosRef.putFile(videoFileUri);
         uploadVideoTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
@@ -147,18 +168,17 @@ public class UploadVideoFileIntentService extends IntentService {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
-                    final int playTime = fetchPlayTime(videoFile);//動画の再生時間を取得
-                    Log.d("動画のダウンロードURL",task.getResult().toString());
-                    UploadTask.TaskSnapshot taskSnapshot = null;
-                    WriteVideosFireStore(db, videoID, taskSnapshot, videoName,task.getResult().toString(), videoThumbnailURL, playTime);
-                } else {
-
+                    videoURL = task.getResult().toString();
+                    Log.d("onHandleIntent","Videoファイルのアップロード完了");
+                    countDownLatch.countDown();
+                }else{
+                    Log.d("onHandleIntent","Videoファイルのアップロード失敗いいいいいいいいいい");
                 }
             }
         });
     }
 
-    public void WriteVideosFireStore(final FirebaseFirestore db, final String videoID, UploadTask.TaskSnapshot taskSnapshot, String videoName, String videoURL, String videoThumbnailURL, int playTime) {
+    public void WriteVideosFireStore(final FirebaseFirestore db, final String videoID, String videoName, String videoURL, String videoThumbnailURL, int playTime) {
         // Create a new user with a first and last name
         final Map<String, Object> video = new HashMap<>();
         //TODO videoオブジェクトに変換
@@ -183,7 +203,7 @@ public class UploadVideoFileIntentService extends IntentService {
                     }
                 });
     }
-    public void WriteVideosOfUsersFireStore(FirebaseFirestore db ,String videoID , Map video){
+    public void WriteVideosOfUsersFireStore(FirebaseFirestore db , String videoID , final Map video){
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         String myUserID = currentUser.getUid();
@@ -221,7 +241,7 @@ public class UploadVideoFileIntentService extends IntentService {
                         //progressDialog.hide();
                         Log.d("VideoIDs","videoIDs追加成功");
                         Context context = getApplicationContext();
-                        Toast.makeText(context , "動画のアップロードを完了しました。", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context , "動画ファイル\n\""+ video.get("VideoName").toString()+"\"\nのアップロードを完了しました。", Toast.LENGTH_LONG).show();
                     }
                 });
     }
