@@ -132,11 +132,6 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
     }
 
     public void onClickCreateVideoItemButton(View view){
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("アップロード中");
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setCancelable(false);
-
         //ファイル選択ダイアログ
         DialogProperties properties = new DialogProperties();
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
@@ -154,7 +149,13 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
             @Override
             public void onSelectedFilePaths(String[] files) {
                 if(checkFileFormat(files)){
-                    FetchVideosID(files);
+                    progressDialog = new ProgressDialog(context);
+                    progressDialog.setTitle("アップロード中");
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    progressDialog.setCancelable(false);
+                    progressDialog.setMessage("アップロード開始");
+                    //progressDialog.show();// TODO　エラーの原因 E/WindowManager: android.view.WindowLeaked: Activity com.example.kobayashi_satoru.miroyo.SetMovieActivity has leaked window DecorView@ea59cd1[アップロード中] that was originally added hereat android.view.ViewRootImpl.<init>(ViewRootImpl.java:511)
+                    startActionUploadVideo(context,files);
                 }else{
                     progressDialog.hide();
                     Toast.makeText(context,"対応しているのはmp4,webm,のみです。",Toast.LENGTH_SHORT).show();
@@ -162,192 +163,6 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
             }
         });
         filePickerDialog.show();
-    }
-
-    public boolean checkFileFormat(String[] filesPass){
-        for (String filePass : filesPass){
-            if(filePass.endsWith(".mp4")){
-                return true;
-            }else if(filePass.endsWith(".webm")){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void FetchVideosID(String[] filesPass){
-        progressDialog.setMessage("アップロード開始");
-        progressDialog.show();// TODO　エラーの原因 E/WindowManager: android.view.WindowLeaked: Activity com.example.kobayashi_satoru.miroyo.SetMovieActivity has leaked window DecorView@ea59cd1[アップロード中] that was originally added hereat android.view.ViewRootImpl.<init>(ViewRootImpl.java:511)
-        final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        for (final String filePass : filesPass){
-            Uri videoFileUri = Uri.fromFile(new File(filePass));
-            String videoFileName = videoFileUri.getLastPathSegment();
-
-            Map <String, Object> video = new HashMap();
-            video.put("VideoName", videoFileName);
-
-            db.collection("videos").add(video)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>(){
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            PutVideoThumbnailFirebaseStorage(db, filePass , documentReference.getId());
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d("FetchVideosID","videokeyの取得エラー",e);
-                            progressDialog.hide();
-                        }
-                    });
-        }
-    }
-
-    public void PutVideoThumbnailFirebaseStorage(final FirebaseFirestore db, final String filePass, final String videoID){
-        //動画のサムネ画像を Firebase ストレージ に保存して URL を取得
-        Bitmap videoThumbnail = ThumbnailUtils.createVideoThumbnail(filePass, MediaStore.Images.Thumbnails.MINI_KIND);//(512×384)
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        videoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
-
-        Uri videoFile = Uri.fromFile(new File(filePass));
-        String thumbnailFileName = null;
-        if (filePass.endsWith(".mp4")) {
-            thumbnailFileName = videoFile.getLastPathSegment().replaceAll(".mp4", ".jpg");//ファイル名の.mp4を.jpgに変換 TODO webmなどにも対応
-        } else if (filePass.endsWith(".webm")){
-            thumbnailFileName = videoFile.getLastPathSegment().replaceAll(".webm", ".jpg");
-        } else {
-            //TODO 例外処理
-        }
-
-        FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
-        final StorageReference storageRef = firebaseStorage.getReference();
-
-        final StorageReference videoThumbnailsRef = storageRef
-                .child("videoThumbnails/" + videoID + thumbnailFileName);//ランダム変数追加
-
-        //ビデオサムネ画像のアップロード
-        UploadTask uploadTask = videoThumbnailsRef.putBytes(data);
-        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-                return videoThumbnailsRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    Uri downloadUri = task.getResult();
-                    Log.d("ダウンロードに使えるURL",task.getResult().toString());
-                    PutVideoFirebaseStorage(db, storageRef, filePass, task.getResult().toString(), videoID);
-                } else {
-
-                }
-            }
-        });
-    }
-
-    public void PutVideoFirebaseStorage(final FirebaseFirestore db, StorageReference storageRef, String filePass, final String videoThumbnailURL, final String videoID) {
-        final Uri videoFile = Uri.fromFile(new File(filePass));
-        final StorageReference videosRef = storageRef.child("videos/" + videoID + videoFile.getLastPathSegment());
-        final String videoName = videoFile.getLastPathSegment();
-        UploadTask uploadVideoTask = videosRef.putFile(videoFile);
-        uploadVideoTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-                return videosRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    final int playTime = fetchPlayTime(videoFile);//動画の再生時間を取得
-                    Log.d("動画のダウンロードURL",task.getResult().toString());
-                    UploadTask.TaskSnapshot taskSnapshot = null;
-                    WriteVideosFireStore(db, videoID, taskSnapshot, videoName,task.getResult().toString(), videoThumbnailURL, playTime);
-                } else {
-
-                }
-            }
-        });
-    }
-
-    public void WriteVideosFireStore(final FirebaseFirestore db, final String videoID, UploadTask.TaskSnapshot taskSnapshot, String videoName, String videoURL, String videoThumbnailURL, int playTime) {
-        // Create a new user with a first and last name
-        final Map<String, Object> video = new HashMap<>();
-        //TODO videoオブジェクトに変換
-        video.put("VideoName", videoName);
-        video.put("VideoURL", videoURL);
-        video.put("PlayTime", String.valueOf(playTime));
-        video.put("ThumbnailURL", videoThumbnailURL);
-        //video.put("VideoByte", taskSnapshot.getMetadata().getSizeBytes());
-
-        db.collection("videos")
-                .document(videoID)
-                .update(video)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        WriteVideosOfUsersFireStore(db ,videoID, video);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                    }
-                });
-    }
-
-    public void WriteVideosOfUsersFireStore(FirebaseFirestore db ,String videoID , Map video){
-        db.collection("users")
-                .document(myUserID)
-                .collection("videos")
-                .document(videoID)
-                .set(video)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        progressDialog.hide();
-                        Log.d("WriteVideosOfUsersFire","onSuccess");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.hide();
-                        Log.d("WriteVideosOfUsersFire","Failure",e);
-                    }
-                });
-        List<String> videoIDs = new ArrayList<>();
-
-        videoIDs.add(videoID);
-        db.collection("users")
-                .document(myUserID)
-                .collection("videos")
-                .document("VideosData")
-                .update("VideoIDs",videoIDs)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        progressDialog.hide();
-                        Log.d("VideoIDs","videoIDs追加成功");
-                    }
-                });
-    }
-
-    private int fetchPlayTime(Uri videoURI) {
-        // メディアメタデータにアクセスするクラスをインスタンス化する。
-        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        mediaMetadataRetriever.setDataSource(getApplicationContext(), videoURI);
-        int secondsPlayTime = Integer.parseInt(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))/ 1000;
-        mediaMetadataRetriever.release();
-        return secondsPlayTime;
     }
 
     //Android 6.0以上では権限の要求が必要。必要な権限がアプリに付与されたときにDialogを表示する。
@@ -367,5 +182,24 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
                 }
             }
         }
+    }
+
+    public boolean checkFileFormat(String[] filesPass){
+        for (String filePass : filesPass){
+            if(filePass.endsWith(".mp4")){
+                return true;
+            }else if(filePass.endsWith(".webm")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void startActionUploadVideo(Context context, String[] filesPass) {
+        final String ACTION_UploadVideo = "com.example.kobayashi_satoru.miroyo.action.UploadVideo";
+        Intent intent = new Intent(context, UploadVideoFileIntentService.class);
+        intent.setAction(ACTION_UploadVideo);
+        intent.putExtra("filesPass", filesPass);
+        context.startService(intent);
     }
 }

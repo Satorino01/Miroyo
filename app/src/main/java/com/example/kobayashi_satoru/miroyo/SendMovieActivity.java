@@ -335,12 +335,6 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         Context context = getApplicationContext();
         Toast.makeText(context , "送信しました", Toast.LENGTH_LONG).show();
     }
-
-    /** クリック連打制御時間(ミリ秒) */
-    private static final long CLICK_DELAY = 2000;
-    /** 前回のクリックイベント実行時間 */
-    private static long mOldClickTime;
-
     /**
      * クリックイベントが実行可能か判断する。
      * @return クリックイベントの実行可否 (true:可, false:否)
@@ -348,7 +342,10 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
     public boolean isClickEvent() {
         // 現在時間を取得する
         long time = System.currentTimeMillis();
-
+        // クリック連打制御時間(ミリ秒)
+        long CLICK_DELAY = 2000;
+        // 前回のクリックイベント実行時間
+        long mOldClickTime = 0;
         // 一定時間経過していなければクリックイベント実行不可
         if (time - mOldClickTime < CLICK_DELAY) {
             Context context = getApplicationContext();
@@ -390,7 +387,7 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
