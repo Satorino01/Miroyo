@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -219,6 +220,8 @@ public class UploadVideoFileIntentService extends IntentService {
                     public void onSuccess(Void aVoid) {
                         //progressDialog.hide();
                         Log.d("VideoIDs","videoIDs追加成功");
+                        Context context = getApplicationContext();
+                        Toast.makeText(context , "動画のアップロードを完了しました。", Toast.LENGTH_LONG).show();
                     }
                 });
     }
