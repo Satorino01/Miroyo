@@ -4,16 +4,13 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.media.ThumbnailUtils;
-import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -24,26 +21,25 @@ import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.google.protobuf.StringValue;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class SetMovieActivity extends AppCompatActivity implements OnRecyclerListener{
 
@@ -69,21 +65,19 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
 
         Intent intent = getIntent();
         myUserID = intent.getStringExtra("myUserID");
-        String[] getFieldArray = {"UserName", "EmailAdress" , "FriendIDs" , "VideoIDs" , "videos"};
-        final List<String> getFieldList = Arrays.asList(getFieldArray);
+
+        final Context context = this;
+        final HashMap<String, Map<String, Object>> videoMaps = new HashMap<>();
+        final List<String> videoIDs = new ArrayList<>();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        //TODO サブコレクション使った取得方法
-        final Context context = this;
-        db.collection("users").document(myUserID).collection("videos").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        final CollectionReference myCollectionReference = db.collection("users").document(myUserID).collection("videos");
+        myCollectionReference.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()){
                     QuerySnapshot querySnapshot = task.getResult();
-                    List DocumentList = querySnapshot.getDocuments();
-                    HashMap videoMaps = new HashMap<>();
-                    List videoIDs = new ArrayList();
+                    List<DocumentSnapshot> DocumentList = querySnapshot.getDocuments();
                     for(Object doc : DocumentList){
                         DocumentSnapshot documentSnapshot = (DocumentSnapshot)doc;
                         if(documentSnapshot.getId().equals("VideosData")){
@@ -95,7 +89,81 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
                     }
                     videoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
                     videoRecyclerView.setAdapter(videoAdapter);
+
+                    ItemTouchHelper itemTouchHelper  = new ItemTouchHelper(
+                            new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP |
+                                    ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
+                                @Override
+                                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                                    final int fromPos = viewHolder.getAdapterPosition();
+                                    final int toPos = target.getAdapterPosition();
+                                    Log.d("onMoved","fromPos:" + String.valueOf(fromPos) +"toPos:" + String.valueOf(toPos));
+                                    videoAdapter.notifyItemMoved(fromPos, toPos);
+                                    return true;// true if moved, false otherwise
+                                }
+
+                                @Override
+                                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                                    final int fromPos = viewHolder.getAdapterPosition();
+                                    // TODO potionのデータセットの削除
+                                    Log.d("onSwiped","fromPos:" + String.valueOf(fromPos));
+                                    //videoAdapter.notifyItemRemoved(fromPos);
+                                }
+                            });
+                    itemTouchHelper.attachToRecyclerView(videoRecyclerView);
+                    Log.d("onComplete","videoIDsの要素数:"+String.valueOf(videoIDs.size()));
+                    Log.d("onComplete","videoMapsの要素数:"+String.valueOf(videoMaps.size()));
+                    Log.d("onComplete","videoIDsの中身:"+videoIDs.toString());
+                    onDataChanged(myCollectionReference, context, videoIDs, videoMaps);
                 }
+            }
+        });
+    }
+
+    public void onDataChanged(CollectionReference myCollectionReference, final Context context, final List videoIDs, final HashMap videoMaps){
+        myCollectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshots, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("DataChanged", "listen:error", e);
+                    return;
+                }
+                for (DocumentChange documentChange : snapshots.getDocumentChanges()) {
+                    switch (documentChange.getType()) {
+                        case ADDED://データの追加
+                            if(!(documentChange.getDocument().getId().equals("VideosData") || videoIDs.contains(documentChange.getDocument().getId()))) {
+                                Log.d("ADDEDonDataChangedID：",documentChange.getDocument().getId());
+                                Log.d("ADDEDonDataChangedMet：",documentChange.getDocument().getData().toString());
+                                Log.d("ADDEDonDataChanged","videoIDsの要素数:"+String.valueOf(videoIDs.size()));
+                                Log.d("ADDEDonDataChanged","videoMapsの要素数:"+String.valueOf(videoMaps.size()));
+                                Log.d("ADDEDonDataChanged","videoIDsの中身:"+videoIDs.toString());
+                                String newVideoID = documentChange.getDocument().getId();
+                                int newPosition = videoMaps.size();
+                                Log.d("newPosition",String.valueOf(newPosition));
+                                videoAdapter.addItem(newPosition,newVideoID,(HashMap)documentChange.getDocument().getData());
+                                videoAdapter.notifyItemInserted(newPosition);
+                            }
+                            break;
+                        case MODIFIED://データの変更
+                            if(!documentChange.getDocument().getId().equals("VideosData")) {
+//                                String newVideoID = documentChange.getDocument().getId();
+//                                videoMaps.put(newVideoID, documentChange.getDocument().getData());
+//                                videoAdapter newVideoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
+//                                videoRecyclerView.setAdapter(newVideoAdapter);
+                            }
+                            break;
+                        case REMOVED:
+                            if(documentChange.getDocument().getId().equals("VideosData")) {
+//                                String newVideoID = documentChange.getDocument().getId();
+//                                videoMaps.remove(newVideoID);
+//                                videoIDs.remove(videoIDs.indexOf(newVideoID));
+//                                videoAdapter newVideoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
+//                                videoRecyclerView.setAdapter(newVideoAdapter);
+                            }
+                            break;
+                    }
+                }
+
             }
         });
     }
@@ -103,23 +171,6 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
     @Override
     public void onStart() {
         super.onStart();
-        //setUI();
-    }
-
-    public void setUI(){
-        Intent intent = getIntent();
-        String myUserID = intent.getStringExtra("myUserID");
-        String[] getFieldArray = {"UserName", "EmailAdress" , "FriendIDs" , "VideoIDs" , "videos"};
-        List<String> getFieldList = Arrays.asList(getFieldArray);
-        HashMap userMap = new HashMap();//TODO mapからUSER型に変換
-        try {
-            userMap = fetchValueFireStore.fetchMap("users", myUserID ,getFieldList);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        List<Object> VideoIDs = Arrays.asList(userMap.get("VideoIDs"));
-
     }
 
     public void onClickReturnButton(View v){
@@ -142,7 +193,7 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
         properties.extensions = null;
 
         filePickerDialog = new FilePickerDialog(this,properties);
-        filePickerDialog.setTitle("Select .mp4　or .webm File");
+        filePickerDialog.setTitle("Select .mp4 or .webm File");
         final Context context = this;
 
         filePickerDialog.setDialogSelectionListener(new DialogSelectionListener() {

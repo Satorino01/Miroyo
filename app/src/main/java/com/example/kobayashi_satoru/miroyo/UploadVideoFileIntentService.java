@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -36,7 +37,7 @@ import java.util.concurrent.CountDownLatch;
 public class UploadVideoFileIntentService extends IntentService {
     // TODO: アクションの名前を変更し、そのタスクを説明するアクション名を選択してください。
     private final String ACTION_UploadVideo = "com.example.kobayashi_satoru.miroyo.action.UploadVideo";
-    private final CountDownLatch countDownLatch = new CountDownLatch(3);
+    private final CountDownLatch uploadCountDownLatch = new CountDownLatch(3);
     private String videoID;
     private String videoURL;
     private String videoThumbnailURL;
@@ -85,7 +86,7 @@ public class UploadVideoFileIntentService extends IntentService {
                             PutVideoFirebaseStorage(storageRef, videoFileName, videoFileUri, filePass, videoID);
                             videoPlayTime = fetchPlayTime(videoFileUri);//動画の再生時間を取得
                             Log.d("onHandleIntent","PlayTime:"+String.valueOf(videoPlayTime));
-                            countDownLatch.countDown();
+                            uploadCountDownLatch.countDown();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -96,7 +97,7 @@ public class UploadVideoFileIntentService extends IntentService {
                         }
                     });
             try {
-                countDownLatch.await();//動画ファイルと動画のサムネファイルのアップロードが終わるまで待機
+                uploadCountDownLatch.await();//動画ファイルと動画のサムネファイルのアップロードが終わるまで待機
                 Log.d("onHandleIntent","非同期処理の統合成功！！");
                 Log.d("onHandleIntent","VideoURL"+videoURL);
                 Log.d("onHandleIntent","VideoThumbnailURL"+videoThumbnailURL);
@@ -144,7 +145,7 @@ public class UploadVideoFileIntentService extends IntentService {
                 if (task.isSuccessful()) {
                     videoThumbnailURL = task.getResult().toString();
                     Log.d("onHandleIntent","Videoサムネ画像のアップロード完了");
-                    countDownLatch.countDown();
+                    uploadCountDownLatch.countDown();
                 }else{
                     Log.d("onHandleIntent","Videoサムネ画像のアップロード失敗いいいいいいいい");
                 }
@@ -170,7 +171,7 @@ public class UploadVideoFileIntentService extends IntentService {
                 if (task.isSuccessful()) {
                     videoURL = task.getResult().toString();
                     Log.d("onHandleIntent","Videoファイルのアップロード完了");
-                    countDownLatch.countDown();
+                    uploadCountDownLatch.countDown();
                 }else{
                     Log.d("onHandleIntent","Videoファイルのアップロード失敗いいいいいいいいいい");
                 }
@@ -207,43 +208,38 @@ public class UploadVideoFileIntentService extends IntentService {
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         String myUserID = currentUser.getUid();
-        db.collection("users")
-                .document(myUserID)
-                .collection("videos")
+        CollectionReference myVideosCollectionReference = db.collection("users").document(myUserID).collection("videos");
+        myVideosCollectionReference
                 .document(videoID)
                 .set(video)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        //progressDialog.hide();
-                        Log.d("WriteVideosOfUsersFire","onSuccess");
+                        Log.d("WriteVideosOfUsersFire","myVideosに追加成功");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        //progressDialog.hide();
-                        Log.d("WriteVideosOfUsersFire","Failure",e);
+                        Log.d("WriteVideosOfUsersFire","myVideosに追加失敗いい",e);
                     }
                 });
 
+        //TODO videoIDsを既存のものから受け取る
         List<String> videoIDs = new ArrayList<>();
-
-        videoIDs.add(videoID);
-        db.collection("users")
-                .document(myUserID)
-                .collection("videos")
+        myVideosCollectionReference
                 .document("VideosData")
                 .update("VideoIDs",videoIDs)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        //progressDialog.hide();
                         Log.d("VideoIDs","videoIDs追加成功");
                         Context context = getApplicationContext();
                         Toast.makeText(context , "動画ファイル\n\""+ video.get("VideoName").toString()+"\"\nのアップロードを完了しました。", Toast.LENGTH_LONG).show();
                     }
                 });
+        Context context = getApplicationContext();
+        Toast.makeText(context , "動画ファイル\n\""+ video.get("VideoName").toString()+"\"\nのアップロードを完了しました。", Toast.LENGTH_LONG).show();
     }
 
     private int fetchPlayTime(Uri videoURI) {

@@ -35,12 +35,12 @@ public class videoAdapter extends RecyclerView.Adapter {
 
     private String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
     private LayoutInflater mInflater;
-    private List<Object> videoIDs;
+    private List<String> videoIDs;
     private HashMap videoMaps;
     private Context mContext;
     private OnRecyclerListener mListener;
 
-    public videoAdapter(Context context, List<Object> VideoIDs, HashMap VideoMaps, OnRecyclerListener listener){
+    public videoAdapter(Context context, List<String> VideoIDs, HashMap VideoMaps, OnRecyclerListener listener){
         mInflater = LayoutInflater.from(context);
         mContext = context;
         videoIDs = VideoIDs;
@@ -59,13 +59,20 @@ public class videoAdapter extends RecyclerView.Adapter {
         // データ表示
         if (videoIDs != null && videoIDs.size() > position && videoIDs.get(position) != null) {
 
+            String videoThumbnailURL = "https://firebasestorage.googleapis.com/v0/b/miroyo.appspot.com/o/errorvideothumbnail.png?alt=media&token=2a82f01a-5472-473b-97dc-1c6bc2d9476b";
             //Firestoreで アップロードした動画一覧をとってくる
-            String videoName = ((HashMap)videoMaps.get(videoIDs.get(position))).get("VideoName").toString();
-            videoHolder.videoNameTxt.setText(videoName);
-            String videoPlayTime = ((HashMap)videoMaps.get(videoIDs.get(position))).get("PlayTime").toString();
-            videoHolder.videoPlayTimeTxt.setText(videoPlayTime);
-            String videoThumbnailURL = ((HashMap)videoMaps.get(videoIDs.get(position))).get("ThumbnailURL").toString();
-
+            try{
+                String videoName = ((HashMap)videoMaps.get(videoIDs.get(position))).get("VideoName").toString();
+                videoHolder.videoNameTxt.setText(videoName);
+                String videoPlayTime = ((HashMap)videoMaps.get(videoIDs.get(position))).get("PlayTime").toString();
+                videoHolder.videoPlayTimeTxt.setText(videoPlayTime);
+                videoThumbnailURL = ((HashMap)videoMaps.get(videoIDs.get(position))).get("ThumbnailURL").toString();
+            } catch (NullPointerException e){
+                Log.d("",String.valueOf(position));
+                Log.d("",String.valueOf(videoIDs.get(position)));
+                Log.d("",String.valueOf(videoMaps.get(videoIDs.get(position))));
+            }
+            Log.d(" onBindViewHolder",String.valueOf(position));
             // DataBean detabean = DataBean.getdata(position);
             RequestOptions options = new RequestOptions()
                     .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
@@ -85,7 +92,7 @@ public class videoAdapter extends RecyclerView.Adapter {
             public void onClick(View view) {
                 SharedPreferences sharedPref = mContext.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor =  sharedPref.edit();
-                editor.putString("setVideoIDSendMovieActivity", videoIDs.get(position).toString());
+                editor.putString("setVideoIDSendMovieActivity", videoIDs.get(position));
                 editor.apply();
                 mListener.onRecyclerClicked(view, position);
             }
@@ -144,5 +151,16 @@ public class videoAdapter extends RecyclerView.Adapter {
             videoNameTxt=itemView.findViewById(R.id.videoNameTxt);
             videoPlayTimeTxt=itemView.findViewById(R.id.videoPlayTimeTxt);
         }
+    }
+
+    public void addItem(int position, String videoID, HashMap videoMap) {
+        videoIDs.add(videoID);
+        videoMaps.put(videoID,videoMap);
+        notifyItemInserted(position);
+    }
+
+    public void remove(int position) {
+        videoIDs.remove(position);
+        notifyItemRemoved(position);
     }
 }
