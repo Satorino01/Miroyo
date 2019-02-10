@@ -35,7 +35,7 @@
             android:configChanges="orientation|screenSize" />
 
         <service
-            android:name=".ReceiveVideoFirebaseMessagingService"
+            android:name=".service.ReceiveVideoFirebaseMessagingService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -60,7 +60,13 @@
             tools:replace="android:theme" />
 
         <service
-            android:name=".UploadVideoFileIntentService"
+            android:name=".service.UploadVideoFileIntentService"
+            android:exported="false" />
+        <service
+            android:name=".service.DeleteVideoFileIntentService"
+            android:exported="false" />
+        <service
+            android:name=".service.MovedVideoListIntentService"
             android:exported="false"></service>
     </application>
 

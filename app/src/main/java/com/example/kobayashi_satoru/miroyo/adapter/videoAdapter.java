@@ -154,12 +154,20 @@ public class videoAdapter extends RecyclerView.Adapter {
     }
 
     public void addItem(int position, String videoID, HashMap videoMap) {
-        videoIDs.add(videoID);
         videoMaps.put(videoID,videoMap);
+        videoIDs.add(videoID);
         notifyItemInserted(position);
     }
 
+    public void moved(int fromPos, int toPos) {
+        String moveID = videoIDs.get(fromPos);
+        videoIDs.set(fromPos,videoIDs.get(toPos));
+        videoIDs.set(toPos,moveID);
+        notifyItemMoved(fromPos,toPos);
+    }
+
     public void remove(int position) {
+        videoMaps.remove(videoIDs.get(position));
         videoIDs.remove(position);
         notifyItemRemoved(position);
     }

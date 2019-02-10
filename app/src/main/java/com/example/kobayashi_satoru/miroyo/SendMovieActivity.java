@@ -203,22 +203,22 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void setVideoButton(HashMap videoMap){
-        ImageView sendVideoThumbnail = findViewById(R.id.sendVideoThumbnail);
-        RequestOptions options = new RequestOptions()
-                .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
-                .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
-                .override(300,300);
-        Glide.with(this).load(videoMap.get("ThumbnailURL").toString())
-                .apply(options)
-                .listener(createLoggerListener("video_thumbnail"))
-                .into(sendVideoThumbnail);
-        //動画テキストのセット
-        TextView videoNameTxt = findViewById(R.id.sendVideoName);
-        videoNameTxt.setText(videoMap.get("VideoName").toString());
-        TextView videoPlayTimeTxt = findViewById(R.id.sendVideoPlayTime);
-        videoPlayTimeTxt.setText(videoMap.get("PlayTime").toString());
-        //videoURLのセット
-        videoURL = videoMap.get("VideoURL").toString();
+        try {
+            ImageView sendVideoThumbnail = findViewById(R.id.sendVideoThumbnail);
+            RequestOptions options = new RequestOptions().error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
+                    .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
+                    .override(300, 300);
+            Glide.with(this).load(videoMap.get("ThumbnailURL").toString()).apply(options).listener(createLoggerListener("video_thumbnail")).into(sendVideoThumbnail);
+            //動画テキストのセット
+            TextView videoNameTxt = findViewById(R.id.sendVideoName);
+            videoNameTxt.setText(videoMap.get("VideoName").toString());
+            TextView videoPlayTimeTxt = findViewById(R.id.sendVideoPlayTime);
+            videoPlayTimeTxt.setText(videoMap.get("PlayTime").toString());
+            //videoURLのセット
+            videoURL = videoMap.get("VideoURL").toString();
+        } catch (NullPointerException e){
+            Log.d("setVideoButton","VideoItem削除済み",e);
+        }
     }
 
     public void setUserButton(HashMap userMap){

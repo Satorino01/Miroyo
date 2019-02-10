@@ -1,7 +1,8 @@
-package com.example.kobayashi_satoru.miroyo;
+package com.example.kobayashi_satoru.miroyo.service;
 import android.content.Intent;
 import android.util.Log;
 
+import com.example.kobayashi_satoru.miroyo.PlayVideoActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 

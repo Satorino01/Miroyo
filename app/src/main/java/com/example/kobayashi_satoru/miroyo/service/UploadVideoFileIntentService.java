@@ -1,4 +1,4 @@
-package com.example.kobayashi_satoru.miroyo;
+package com.example.kobayashi_satoru.miroyo.service;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -41,6 +41,7 @@ public class UploadVideoFileIntentService extends IntentService {
     private String videoID;
     private String videoURL;
     private String videoThumbnailURL;
+    private List<String> videoIDs;
     private int videoPlayTime;
 
     public UploadVideoFileIntentService() {
@@ -54,6 +55,7 @@ public class UploadVideoFileIntentService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_UploadVideo.equals(action)) {
                 final String[] filesPass = intent.getStringArrayExtra("filesPass");
+                videoIDs = intent.getStringArrayListExtra("videoIDs");
                 handleActionUploadVideo(filesPass);
             }
         }
@@ -226,7 +228,7 @@ public class UploadVideoFileIntentService extends IntentService {
                 });
 
         //TODO videoIDsを既存のものから受け取る
-        List<String> videoIDs = new ArrayList<>();
+        videoIDs.add(videoID);
         myVideosCollectionReference
                 .document("VideosData")
                 .update("VideoIDs",videoIDs)

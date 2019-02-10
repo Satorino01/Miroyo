@@ -3,6 +3,7 @@ package com.example.kobayashi_satoru.miroyo;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,6 +18,9 @@ import android.widget.Toast;
 
 import com.example.kobayashi_satoru.miroyo.adapter.videoAdapter;
 import com.example.kobayashi_satoru.miroyo.listener.OnRecyclerListener;
+import com.example.kobayashi_satoru.miroyo.service.DeleteVideoFileIntentService;
+import com.example.kobayashi_satoru.miroyo.service.MovedVideoListIntentService;
+import com.example.kobayashi_satoru.miroyo.service.UploadVideoFileIntentService;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
@@ -30,25 +34,22 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.protobuf.StringValue;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 public class SetMovieActivity extends AppCompatActivity implements OnRecyclerListener{
 
-    private final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
-
     private videoAdapter videoAdapter;
     private RecyclerView videoRecyclerView;
-
     private FilePickerDialog filePickerDialog;
+
+    private Context context;
+    private static HashMap<String, Map<String, Object>> videoMaps;
+    private static ArrayList<String> videoIDs;
 
     private String myUserID;
 
@@ -66,9 +67,9 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
         Intent intent = getIntent();
         myUserID = intent.getStringExtra("myUserID");
 
-        final Context context = this;
-        final HashMap<String, Map<String, Object>> videoMaps = new HashMap<>();
-        final List<String> videoIDs = new ArrayList<>();
+        context = this;
+        videoMaps = new HashMap<>();
+        videoIDs = new ArrayList<>();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         final CollectionReference myCollectionReference = db.collection("users").document(myUserID).collection("videos");
@@ -81,10 +82,10 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
                     for(Object doc : DocumentList){
                         DocumentSnapshot documentSnapshot = (DocumentSnapshot)doc;
                         if(documentSnapshot.getId().equals("VideosData")){
-                            //List<Object> videoIDs = (List) documentSnapshot.getData().get("VideoIDs");
+                            videoIDs = (ArrayList<String>) documentSnapshot.getData().get("VideoIDs");
+                            Log.d("videoIDs",videoIDs.toString());
                         }else{
                             videoMaps.put(documentSnapshot.getId(),documentSnapshot.getData());
-                            videoIDs.add(documentSnapshot.getId());
                         }
                     }
                     videoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
@@ -98,22 +99,25 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
                                     final int fromPos = viewHolder.getAdapterPosition();
                                     final int toPos = target.getAdapterPosition();
                                     Log.d("onMoved","fromPos:" + String.valueOf(fromPos) +"toPos:" + String.valueOf(toPos));
-                                    videoAdapter.notifyItemMoved(fromPos, toPos);
+                                    videoAdapter.moved(fromPos, toPos);//videoIDs内の値交換
+                                    startActionMovedVideo(context);
                                     return true;// true if moved, false otherwise
                                 }
 
                                 @Override
                                 public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                                     final int fromPos = viewHolder.getAdapterPosition();
-                                    // TODO potionのデータセットの削除
                                     Log.d("onSwiped","fromPos:" + String.valueOf(fromPos));
-                                    //videoAdapter.notifyItemRemoved(fromPos);
+                                    String deleteVideoID = videoIDs.get(fromPos);
+                                    startActionDeleteVideo(deleteVideoID);
+                                    CheckSetVideoID(deleteVideoID);
+                                    videoAdapter.remove(fromPos);
                                 }
                             });
                     itemTouchHelper.attachToRecyclerView(videoRecyclerView);
                     Log.d("onComplete","videoIDsの要素数:"+String.valueOf(videoIDs.size()));
                     Log.d("onComplete","videoMapsの要素数:"+String.valueOf(videoMaps.size()));
-                    Log.d("onComplete","videoIDsの中身:"+videoIDs.toString());
+                    Log.d("onComplete","videoIDsの中身:" + videoIDs.toString());
                     onDataChanged(myCollectionReference, context, videoIDs, videoMaps);
                 }
             }
@@ -136,29 +140,31 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
                                 Log.d("ADDEDonDataChangedMet：",documentChange.getDocument().getData().toString());
                                 Log.d("ADDEDonDataChanged","videoIDsの要素数:"+String.valueOf(videoIDs.size()));
                                 Log.d("ADDEDonDataChanged","videoMapsの要素数:"+String.valueOf(videoMaps.size()));
-                                Log.d("ADDEDonDataChanged","videoIDsの中身:"+videoIDs.toString());
+                                Log.d("ADDEDonDataChanged","videoIDsの中身:" + videoIDs.toString());
                                 String newVideoID = documentChange.getDocument().getId();
                                 int newPosition = videoMaps.size();
                                 Log.d("newPosition",String.valueOf(newPosition));
                                 videoAdapter.addItem(newPosition,newVideoID,(HashMap)documentChange.getDocument().getData());
-                                videoAdapter.notifyItemInserted(newPosition);
+                                //videoAdapter.notifyItemInserted(newPosition);
                             }
                             break;
                         case MODIFIED://データの変更
-                            if(!documentChange.getDocument().getId().equals("VideosData")) {
-//                                String newVideoID = documentChange.getDocument().getId();
+                            if(documentChange.getDocument().getId().equals("VideosData")) {
 //                                videoMaps.put(newVideoID, documentChange.getDocument().getData());
 //                                videoAdapter newVideoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
 //                                videoRecyclerView.setAdapter(newVideoAdapter);
                             }
                             break;
                         case REMOVED:
-                            if(documentChange.getDocument().getId().equals("VideosData")) {
-//                                String newVideoID = documentChange.getDocument().getId();
+                            if(!documentChange.getDocument().getId().equals("VideosData")) {
+                                String deleteVideoID = documentChange.getDocument().getId();
+                                Log.d("REMOVEDonDataChanged","削除したvideoID:" + deleteVideoID);
+                                Log.d("REMOVEDonDataChanged","削除したvideoIDがvideoIDsに含まれているかどうか(うまくいっているならFalseのはず):" + String.valueOf(videoIDs.contains(deleteVideoID)));
 //                                videoMaps.remove(newVideoID);
 //                                videoIDs.remove(videoIDs.indexOf(newVideoID));
 //                                videoAdapter newVideoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
 //                                videoRecyclerView.setAdapter(newVideoAdapter);
+                            }else{
                             }
                             break;
                     }
@@ -246,11 +252,43 @@ public class SetMovieActivity extends AppCompatActivity implements OnRecyclerLis
         return false;
     }
 
-    public static void startActionUploadVideo(Context context, String[] filesPass) {
+    public void startActionUploadVideo(Context context, String[] filesPass) {
         final String ACTION_UploadVideo = "com.example.kobayashi_satoru.miroyo.action.UploadVideo";
         Intent intent = new Intent(context, UploadVideoFileIntentService.class);
         intent.setAction(ACTION_UploadVideo);
         intent.putExtra("filesPass", filesPass);
+        intent.putStringArrayListExtra("videoIDs", videoIDs);
         context.startService(intent);
+    }
+
+    //クライアント側で操作した結果（videoIDs）を渡すのみ
+    public void startActionMovedVideo(Context context) {
+        final String ACTION_MovedVideo = "com.example.kobayashi_satoru.miroyo.action.MovedVideo";
+        Intent intent = new Intent(context, MovedVideoListIntentService.class);
+        intent.setAction(ACTION_MovedVideo);
+        intent.putStringArrayListExtra("videoIDs", videoIDs);
+        context.startService(intent);
+    }
+
+    //VideoIDで削除するのは確実性が高いから。videoのpositionはリアルタイムで変更される可能性がある。
+    public void startActionDeleteVideo(String deleteVideoID) {
+        final String ACTION_DeleteVideo = "com.example.kobayashi_satoru.miroyo.action.DeleteVideo";
+        Intent intent = new Intent(context, DeleteVideoFileIntentService.class);
+        intent.setAction(ACTION_DeleteVideo);
+        intent.putExtra("videoID", deleteVideoID);
+        intent.putExtra("VideoName",videoMaps.get(deleteVideoID).get("VideoName").toString());
+        intent.putStringArrayListExtra("videoIDs",videoIDs);
+        context.startService(intent);
+    }
+
+    public void CheckSetVideoID(String deleteVideoID){
+        String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
+        SharedPreferences sharedPref = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        String setID = sharedPref.getString("setVideoIDSendMovieActivity","noSetVideoStatus");
+        if(setID.equals(deleteVideoID)){
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString("setVideoIDSendMovieActivity", "noSetVideoStatus");
+            editor.apply();
+        }
     }
 }
