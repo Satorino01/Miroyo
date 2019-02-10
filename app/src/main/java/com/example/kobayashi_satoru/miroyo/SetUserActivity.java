@@ -10,7 +10,7 @@ import com.example.kobayashi_satoru.miroyo.ui.setuser.SetUserFragment;
 
 public class SetUserActivity extends AppCompatActivity {
 
-    private static final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
+    private final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

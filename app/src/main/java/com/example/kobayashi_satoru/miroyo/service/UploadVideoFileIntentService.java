@@ -62,6 +62,8 @@ public class UploadVideoFileIntentService extends IntentService {
     }
 
     private void handleActionUploadVideo(String[] filesPass) {
+        Context context = getApplicationContext();
+        Toast.makeText(context , "動画ファイルのアップロードを開始しました。", Toast.LENGTH_LONG).show();
         FetchVideosID(filesPass);
     }
 
@@ -236,8 +238,6 @@ public class UploadVideoFileIntentService extends IntentService {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("VideoIDs","videoIDs追加成功");
-                        Context context = getApplicationContext();
-                        Toast.makeText(context , "動画ファイル\n\""+ video.get("VideoName").toString()+"\"\nのアップロードを完了しました。", Toast.LENGTH_LONG).show();
                     }
                 });
         Context context = getApplicationContext();

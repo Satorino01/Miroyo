@@ -56,14 +56,12 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
 
     private final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
     private String TAG = "SendMovieActivity";
-
     private String myUserID;
     private String myUserName;
 
     private String videoURL;
 
     private String responseUserID;
-
     private FirebaseAuth firebaseAuth;
     private NavigationView navigationView;
 
@@ -114,7 +112,16 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
         //TODO VideoオブジェクトとUserオブジェクトでセット
         //動画アイテムのセット
         String videoID = sharedPref.getString("setVideoIDSendMovieActivity", "noSetVideoStatus");
-        if(videoID != "noSetVideoStatus") {
+        Log.d("setVideoID",videoID);
+        if(videoID.equals("noSetVideoStatus")) {
+            videoURL = null;
+            final HashMap resultMap = new HashMap();
+            resultMap.put("VideoName", "動画ファイルを選択してください");
+            resultMap.put("PlayTime", "");
+            resultMap.put("ThumbnailURL", "Default");
+            resultMap.put("VideoURL", "Default");
+            setVideoButton(resultMap);
+        }else{
             List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTime", "VideoName", "VideoURL");
             fetchValueFirestore("videos", videoID, getFieldList);
         }
@@ -203,12 +210,21 @@ public class SendMovieActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void setVideoButton(HashMap videoMap){
+        Log.d("HashMap videoMap:",videoMap.toString());
         try {
             ImageView sendVideoThumbnail = findViewById(R.id.sendVideoThumbnail);
-            RequestOptions options = new RequestOptions().error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
-                    .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
-                    .override(300, 300);
-            Glide.with(this).load(videoMap.get("ThumbnailURL").toString()).apply(options).listener(createLoggerListener("video_thumbnail")).into(sendVideoThumbnail);
+            if (videoMap.get("ThumbnailURL").toString().equals("Default")){
+                sendVideoThumbnail.setImageResource(R.drawable.samplemoviethumbnail);
+            }else{
+                RequestOptions options = new RequestOptions()
+                        .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
+                        .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
+                        .override(300, 300);
+                Glide.with(this).load(videoMap.get("ThumbnailURL").toString())
+                        .apply(options)
+                        .listener(createLoggerListener("video_thumbnail"))
+                        .into(sendVideoThumbnail);
+            }
             //動画テキストのセット
             TextView videoNameTxt = findViewById(R.id.sendVideoName);
             videoNameTxt.setText(videoMap.get("VideoName").toString());
