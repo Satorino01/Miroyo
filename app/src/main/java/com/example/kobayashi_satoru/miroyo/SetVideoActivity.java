@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SetMovieActivity extends AppCompatActivity implements OnRecyclerListener{
+public class SetVideoActivity extends AppCompatActivity implements OnRecyclerListener{
 
     private videoAdapter videoAdapter;
     private RecyclerView videoRecyclerView;

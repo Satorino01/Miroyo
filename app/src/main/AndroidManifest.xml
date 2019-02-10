@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SendMovieActivity"
+            android:name=".SendVideoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -28,7 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SetMovieActivity" />
+        <activity android:name=".SetVideoActivity" />
         <activity android:name=".SetUserActivity" />
         <activity
             android:name=".PlayVideoActivity"
