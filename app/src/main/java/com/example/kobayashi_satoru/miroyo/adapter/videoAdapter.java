@@ -25,6 +25,7 @@ import com.bumptech.glide.request.target.Target;
 import com.example.kobayashi_satoru.miroyo.R;
 import com.example.kobayashi_satoru.miroyo.SquareImageView;
 import com.example.kobayashi_satoru.miroyo.listener.OnRecyclerListener;
+import com.example.kobayashi_satoru.miroyo.milliSecond;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +48,7 @@ public class videoAdapter extends RecyclerView.Adapter {
         videoMaps = VideoMaps;
         mListener = listener;
     }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -64,7 +66,7 @@ public class videoAdapter extends RecyclerView.Adapter {
             try{
                 String videoName = ((HashMap)videoMaps.get(videoIDs.get(position))).get("VideoName").toString();
                 videoHolder.videoNameTxt.setText(videoName);
-                String videoPlayTime = ((HashMap)videoMaps.get(videoIDs.get(position))).get("PlayTime").toString();
+                String videoPlayTime = milliSecond.toTimeColonFormat(Integer.parseInt(((HashMap)videoMaps.get(videoIDs.get(position))).get("PlayTimeMilliSecond").toString()));
                 videoHolder.videoPlayTimeTxt.setText(videoPlayTime);
                 videoThumbnailURL = ((HashMap)videoMaps.get(videoIDs.get(position))).get("ThumbnailURL").toString();
             } catch (NullPointerException e){

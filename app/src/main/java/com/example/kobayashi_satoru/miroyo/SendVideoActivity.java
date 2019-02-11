@@ -111,12 +111,12 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
             videoURL = null;
             final HashMap resultMap = new HashMap();
             resultMap.put("VideoName", "動画ファイルを選択してください");
-            resultMap.put("PlayTime", "");
+            resultMap.put("PlayTimeMilliSecond", "");
             resultMap.put("ThumbnailURL", "Default");
             resultMap.put("VideoURL", "Default");
             setVideoButton(resultMap);
         }else{
-            List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTime", "VideoName", "VideoURL");
+            List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTimeMilliSecond", "VideoName", "VideoURL");
             fetchValueFirestore("videos", videoID, getFieldList);
         }
 
@@ -223,7 +223,14 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
             TextView videoNameTxt = findViewById(R.id.sendVideoName);
             videoNameTxt.setText(videoMap.get("VideoName").toString());
             TextView videoPlayTimeTxt = findViewById(R.id.sendVideoPlayTime);
-            videoPlayTimeTxt.setText(videoMap.get("PlayTime").toString());
+            if(videoMap.get("PlayTimeMilliSecond").getClass().toString().equals("class java.lang.String")){
+                String PlayTime = videoMap.get("PlayTimeMilliSecond").toString();
+                videoPlayTimeTxt.setText(PlayTime);
+            } else {
+                String PlayTime = milliSecond.toTimeColonFormat((int)videoMap.get("PlayTimeMilliSecond"));
+                videoPlayTimeTxt.setText(PlayTime);
+            }
+
             //videoURLのセット
             videoURL = videoMap.get("VideoURL").toString();
         } catch (NullPointerException e){

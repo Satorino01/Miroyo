@@ -189,7 +189,7 @@ public class UploadVideoFileIntentService extends IntentService {
         //TODO videoオブジェクトに変換
         video.put("VideoName", videoName);
         video.put("VideoURL", videoURL);
-        video.put("PlayTime", String.valueOf(playTime));
+        video.put("PlayTimeMilliSecond", playTime);
         video.put("ThumbnailURL", videoThumbnailURL);
         //video.put("VideoByte", taskSnapshot.getMetadata().getSizeBytes());
 
@@ -248,8 +248,8 @@ public class UploadVideoFileIntentService extends IntentService {
         // メディアメタデータにアクセスするクラスをインスタンス化する。
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
         mediaMetadataRetriever.setDataSource(getApplicationContext(), videoURI);
-        int secondsPlayTime = Integer.parseInt(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))/ 1000;
+        int msPlayTime = Integer.parseInt(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
         mediaMetadataRetriever.release();
-        return secondsPlayTime;
+        return msPlayTime;
     }
 }
