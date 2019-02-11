@@ -17,16 +17,23 @@ public final class Video {
     private final String mName;
 
     @Nullable
+    private final String mVideoURL;
+
+    @Nullable
+    private final String mThumbnailURL;
+
+    @Nullable
     private final int mPlayTime;
 
     @Nullable
     private final int mByte;
 
     @Nullable
-    private final String mVideoURL;
+    private final int mStartTime;
 
     @Nullable
-    private final String mThumbnailURL;
+    private final int mEndTime;
+
 
     public Video(@NonNull String Id, @NonNull String contentType, @Nullable String videoName, @Nullable int videoPlayTime, @Nullable int videoByte, @Nullable String videoURL, @Nullable String thumbnailURL) {
         this.mId = Id;
@@ -35,33 +42,43 @@ public final class Video {
         }
         this.mContentType = contentType;
         this.mName = videoName;
-        this.mPlayTime = videoPlayTime;
-        this.mByte = videoByte;
         this.mVideoURL = videoURL;
         this.mThumbnailURL = thumbnailURL;
+        this.mPlayTime = videoPlayTime;
+        this.mByte = videoByte;
+        this.mStartTime = 0;
+        this.mEndTime = 0;
     }
 
-//    public Video(@NonNull String Id, @NonNull String contentType, @Nullable String videoName, @Nullable String videoURL, @Nullable String thumbnailURL) {
-//        this.mId = Id;
-//        if(!contentType.equals("YoutubeURL")){
-//            throw new IllegalArgumentException("YoutubeURLではありません");
-//        }
-//        this.mContentType = contentType;
-//        this.mName = videoName;
-//        this.mVideoURL = videoURL;
-//        this.mThumbnailURL = thumbnailURL;
-//    }
-//
-//    public Video(@NonNull String Id, @NonNull String contentType, @Nullable String videoName, @Nullable String videoURL, @Nullable String thumbnailURL) {
-//        this.mId = Id;
-//        if(!contentType.equals("URL")){
-//            throw new IllegalArgumentException("URLではありません");
-//        }
-//        this.mContentType = contentType;
-//        this.mName = videoName;
-//        this.mVideoURL = videoURL;
-//        this.mThumbnailURL = thumbnailURL;
-//    }
+    public Video(@NonNull String Id, @NonNull String contentType, @Nullable String videoName, @Nullable String videoURL, @Nullable String thumbnailURL, @Nullable int mStartTime, @Nullable int mEndTime) {
+        this.mId = Id;
+        if(!contentType.equals("YoutubeURL")){
+            throw new IllegalArgumentException("YoutubeURLではありません");
+        }
+        this.mContentType = contentType;
+        this.mName = videoName;
+        this.mVideoURL = videoURL;
+        this.mThumbnailURL = thumbnailURL;
+        this.mPlayTime = 0;
+        this.mByte = 0;
+        this.mStartTime = mStartTime;
+        this.mEndTime = mEndTime;
+    }
+
+    public Video(@NonNull String Id, @NonNull String contentType, @Nullable String videoName, @Nullable String videoURL, @Nullable String thumbnailURL) {
+        this.mId = Id;
+        if(!contentType.equals("URL")){
+            throw new IllegalArgumentException("URLではありません");
+        }
+        this.mContentType = contentType;
+        this.mName = videoName;
+        this.mVideoURL = videoURL;
+        this.mThumbnailURL = thumbnailURL;
+        this.mPlayTime = 0;
+        this.mByte = 0;
+        this.mStartTime = 0;
+        this.mEndTime = 0;
+    }
 
     @NonNull
     public String getId() {
@@ -86,6 +103,16 @@ public final class Video {
     @Nullable
     public int getByte() {
         return mByte;
+    }
+
+    @Nullable
+    public int getmStartTime() {
+        return mStartTime;
+    }
+
+    @Nullable
+    public int getmEndTime() {
+        return mEndTime;
     }
 
     @Override

@@ -7,32 +7,23 @@
         <item
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_manage"
-            android:title="フレンドリクエスト受信箱" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="設定" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="ログアウト"/>
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="アカウントの削除" />
+            android:title="履歴一覧" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="設定">
         <menu>
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="受信履歴" />
+                android:title="着信可否" />
             <item
-                android:id="@+id/nav_send"
+                android:id="@+id/logout"
                 android:icon="@drawable/ic_menu_send"
-                android:title="送信履歴" />
+                android:title="ログアウト" />
+            <item
+                android:id="@+id/deleteAcount"
+                android:icon="@drawable/ic_menu_send"
+                android:title="アカウントの削除" />
         </menu>
     </item>
-
 </menu>
