@@ -185,6 +185,49 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
         super.onStart();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Registers BroadcastReceiver to track network connection changes.
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mReceiver = new NetworkReceiver(this);
+        registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mReceiver != null) {
+            unregisterReceiver(mReceiver);
+        }
+    }
+
+    @Override
+    public void changedToWifi() {
+        if(alertNetworkDialog != null){
+            alertNetworkDialog.dismiss();
+            alertNetworkDialog = null;
+        }
+    }
+
+    @Override
+    public void changedToMobile() {
+        if(alertNetworkDialog != null){
+            alertNetworkDialog.dismiss();
+            alertNetworkDialog = null;
+        }
+    }
+
+    @Override
+    public void changedToOffline() {
+        alertNetworkDialog = new AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_signal_cellular_off_black_24dp)//.setIcon(R.drawable.ic_signal_wifi_off_black_24dp)
+                .setTitle("OFLINE")
+                .setMessage("ネットワークに接続してください")
+                .show();
+        alertNetworkDialog.setCanceledOnTouchOutside(false);
+    }
+
     public void onClickReturnButton(View v){
         finish();
     }
@@ -299,49 +342,6 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString("setVideoIDSendMovieActivity", "noSetVideoStatus");
             editor.apply();
-        }
-    }
-
-    @Override
-    public void changedToWifi() {
-        if(alertNetworkDialog != null){
-            alertNetworkDialog.dismiss();
-            alertNetworkDialog = null;
-        }
-    }
-
-    @Override
-    public void changedToMobile() {
-        if(alertNetworkDialog != null){
-            alertNetworkDialog.dismiss();
-            alertNetworkDialog = null;
-        }
-    }
-
-    @Override
-    public void changedToOffline() {
-        alertNetworkDialog = new AlertDialog.Builder(this)
-                .setIcon(R.drawable.ic_signal_cellular_off_black_24dp)//.setIcon(R.drawable.ic_signal_wifi_off_black_24dp)
-                .setTitle("OFLINE")
-                .setMessage("ネットワークに接続してください")
-                .show();
-        alertNetworkDialog.setCanceledOnTouchOutside(false);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Registers BroadcastReceiver to track network connection changes.
-        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        mReceiver = new NetworkReceiver(this);
-        registerReceiver(mReceiver, filter);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if(mReceiver != null) {
-            unregisterReceiver(mReceiver);
         }
     }
 }

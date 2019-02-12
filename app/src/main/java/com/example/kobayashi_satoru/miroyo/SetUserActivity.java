@@ -25,26 +25,22 @@ public class SetUserActivity extends AppCompatActivity implements NetworkReceive
         if (savedInstanceState == null) {
         }
     }
-    public void onClickUser0(View v){
-        SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor =  sharedPref.edit();
-        //アイコンや文字列のセット
-        editor.putString("setUserIDSendMovieActivity", "wvJVcJftx3QMwdnF4Uzf4kTlNKd2");
-        editor.putString("setUserIconSendMovieActivity", "sampleusericon");
-        editor.apply();
-        finish();
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Registers BroadcastReceiver to track network connection changes.
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mReceiver = new NetworkReceiver(this);
+        registerReceiver(mReceiver, filter);
     }
-    public void onClickUser1(View v){
-        SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor =  sharedPref.edit();
-        //アイコンや文字列のセット
-        editor.putString("setUserIDSendMovieActivity", "GW2ht4RNQzWfmtEGP4DaO4qsLGG3");
-        editor.putString("setUserIconSendMovieActivity", "satoruicon");
-        editor.apply();
-        finish();
-    }
-    public void onClickReturnButton(View v){
-        finish();
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mReceiver != null) {
+            unregisterReceiver(mReceiver);
+        }
     }
 
     @Override
@@ -73,20 +69,25 @@ public class SetUserActivity extends AppCompatActivity implements NetworkReceive
         alertNetworkDialog.setCanceledOnTouchOutside(false);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Registers BroadcastReceiver to track network connection changes.
-        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        mReceiver = new NetworkReceiver(this);
-        registerReceiver(mReceiver, filter);
+    public void onClickUser0(View v){
+        SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor =  sharedPref.edit();
+        //アイコンや文字列のセット
+        editor.putString("setUserIDSendMovieActivity", "wvJVcJftx3QMwdnF4Uzf4kTlNKd2");
+        editor.putString("setUserIconSendMovieActivity", "sampleusericon");
+        editor.apply();
+        finish();
     }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if(mReceiver != null) {
-            unregisterReceiver(mReceiver);
-        }
+    public void onClickUser1(View v){
+        SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor =  sharedPref.edit();
+        //アイコンや文字列のセット
+        editor.putString("setUserIDSendMovieActivity", "GW2ht4RNQzWfmtEGP4DaO4qsLGG3");
+        editor.putString("setUserIconSendMovieActivity", "satoruicon");
+        editor.apply();
+        finish();
+    }
+    public void onClickReturnButton(View v){
+        finish();
     }
 }
