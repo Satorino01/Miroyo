@@ -62,8 +62,6 @@ public class UploadVideoFileIntentService extends IntentService {
     }
 
     private void handleActionUploadVideo(String[] filesPass) {
-        Context context = getApplicationContext();
-        Toast.makeText(context , "動画ファイルのアップロードを開始しました。", Toast.LENGTH_LONG).show();
         FetchVideosID(filesPass);
     }
 
@@ -250,7 +248,7 @@ public class UploadVideoFileIntentService extends IntentService {
                     }
                 });
         Context context = getApplicationContext();
-        Toast.makeText(context , "動画ファイル\n\""+ video.get("VideoName").toString()+"\"\nのアップロードを完了しました。", Toast.LENGTH_LONG).show();
+        Toast.makeText(context , "アップロードを完了しました\n\""+ video.get("VideoName").toString()+"\"", Toast.LENGTH_LONG).show();
     }
 
     private int fetchPlayTime(Uri videoURI) {

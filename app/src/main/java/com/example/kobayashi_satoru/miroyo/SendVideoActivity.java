@@ -394,10 +394,11 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor =  sharedPref.edit();
         editor.clear().commit();
-        Intent intent = new Intent(this, LoginActivity.class);
-        //startActivityForResult(intent);
-        startActivity(intent);
 
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(myUserID);
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
     }
 
     @Override
