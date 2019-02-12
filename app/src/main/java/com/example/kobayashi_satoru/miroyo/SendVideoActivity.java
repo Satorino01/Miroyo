@@ -69,7 +69,7 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
             e.printStackTrace();
         }
         setTheme(R.style.AppTheme_NoActionBar);
-        setContentView(R.layout.send_movie_activity);
+        setContentView(R.layout.send_video_activity);
     }
 
     @Override

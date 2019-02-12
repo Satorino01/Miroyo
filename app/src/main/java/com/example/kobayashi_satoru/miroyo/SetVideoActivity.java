@@ -58,7 +58,7 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.set_movie_activity);
+        setContentView(R.layout.set_video_activity);
 
         videoRecyclerView = findViewById(R.id.videoRecyclerView);// RecyclerViewの参照を取得
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);// レイアウトマネージャを設定(ここで縦方向の標準リストであることを指定)
