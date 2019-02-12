@@ -70,7 +70,7 @@
             android:name=".service.MovedVideoListIntentService"
             android:exported="false"></service>
 
-        <receiver android:name=".NetworkReceiver" >
+        <receiver android:name=".receiver.NetworkReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>

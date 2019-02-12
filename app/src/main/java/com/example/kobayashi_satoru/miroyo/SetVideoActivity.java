@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.kobayashi_satoru.miroyo.adapter.videoAdapter;
 import com.example.kobayashi_satoru.miroyo.listener.OnRecyclerListener;
+import com.example.kobayashi_satoru.miroyo.receiver.NetworkReceiver;
 import com.example.kobayashi_satoru.miroyo.service.DeleteVideoFileIntentService;
 import com.example.kobayashi_satoru.miroyo.service.MovedVideoListIntentService;
 import com.example.kobayashi_satoru.miroyo.service.UploadVideoFileIntentService;
@@ -302,7 +303,6 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
     }
 
     public void startActionUploadVideo(Context context, String[] filesPass) {
-
         Context applicationContext = getApplicationContext();
         Toast.makeText(applicationContext , "アップロードを開始しました", Toast.LENGTH_LONG).show();
 

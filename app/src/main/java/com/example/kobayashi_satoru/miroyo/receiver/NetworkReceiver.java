@@ -1,4 +1,4 @@
-package com.example.kobayashi_satoru.miroyo;
+package com.example.kobayashi_satoru.miroyo.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

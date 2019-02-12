@@ -9,7 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.example.kobayashi_satoru.miroyo.ui.setuser.SetUserFragment;
+import com.example.kobayashi_satoru.miroyo.receiver.NetworkReceiver;
 
 public class SetUserActivity extends AppCompatActivity implements NetworkReceiver.OnNetworkStateChangedListener{
 
