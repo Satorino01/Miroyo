@@ -19,6 +19,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_navigation_drawer" />
+    <include layout="@layout/content_send_video_drawer" />
 
 </android.support.design.widget.CoordinatorLayout>

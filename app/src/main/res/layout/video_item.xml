@@ -49,18 +49,21 @@
                     android:id="@+id/videoNameTxt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="UNKNOWN" />
 
                 <TextView
                     android:id="@+id/videoPlayTimeTxt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="00:00" />
 
                 <TextView
                     android:id="@+id/videoMegaByteTxt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="MB" />
 
             </LinearLayout>

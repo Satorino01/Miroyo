@@ -10,7 +10,7 @@
     tools:context=".SendVideoActivity">
 
     <include
-        layout="@layout/app_bar_navigation_drawer"
+        layout="@layout/app_bar_send_video"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".SendVideoActivity"
-    tools:showIn="@layout/app_bar_navigation_drawer">
+    tools:showIn="@layout/app_bar_send_video">
         <LinearLayout
             android:id="@+id/linearLayout4"
             android:layout_width="0dp"
@@ -27,7 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="24dp"
                 android:layout_marginTop="8dp"
-                android:text="送信する動画ファイルの選択" />
+                android:text="送信する動画の選択" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -73,18 +73,20 @@
                             android:id="@+id/sendVideoNameTxt"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="動画ファイルを選択してください" />
+                            android:layout_weight="1"/>
 
                         <TextView
                             android:id="@+id/sendVideoPlayTimeTxt"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="" />
 
                         <TextView
                             android:id="@+id/sendVideoByteTxt"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
                     </LinearLayout>
 
                 </LinearLayout>

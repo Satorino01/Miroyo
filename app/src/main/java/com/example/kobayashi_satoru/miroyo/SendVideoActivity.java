@@ -110,7 +110,7 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         if(videoID.equals("noSetVideoStatus")) {
             videoURL = null;
             final HashMap resultMap = new HashMap();
-            resultMap.put("VideoName", "動画ファイルを選択してください");
+            resultMap.put("VideoName", "動画を選択してください");
             resultMap.put("PlayTimeMilliSecond", "");
             resultMap.put("VideoByte", "");
             resultMap.put("ThumbnailURL", "Default");

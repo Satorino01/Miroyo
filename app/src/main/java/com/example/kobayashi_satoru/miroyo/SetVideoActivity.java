@@ -255,7 +255,7 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
     public void startActionUploadVideo(Context context, String[] filesPass) {
 
         Context applicationContext = getApplicationContext();
-        Toast.makeText(applicationContext , "動画ファイルのアップロードを開始しました。", Toast.LENGTH_LONG).show();
+        Toast.makeText(applicationContext , "アップロードを開始しました", Toast.LENGTH_LONG).show();
 
         final String ACTION_UploadVideo = "com.example.kobayashi_satoru.miroyo.action.UploadVideo";
         Intent intent = new Intent(context, UploadVideoFileIntentService.class);
