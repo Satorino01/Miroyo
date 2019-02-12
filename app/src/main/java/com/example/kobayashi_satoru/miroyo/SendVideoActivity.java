@@ -112,11 +112,12 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
             final HashMap resultMap = new HashMap();
             resultMap.put("VideoName", "動画ファイルを選択してください");
             resultMap.put("PlayTimeMilliSecond", "");
+            resultMap.put("VideoByte", "");
             resultMap.put("ThumbnailURL", "Default");
             resultMap.put("VideoURL", "Default");
             setVideoButton(resultMap);
         }else{
-            List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTimeMilliSecond", "VideoName", "VideoURL");
+            List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTimeMilliSecond", "VideoName", "VideoURL", "VideoByte");
             fetchValueFirestore("videos", videoID, getFieldList);
         }
 
@@ -185,8 +186,11 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
                     DocumentSnapshot document = task.getResult();
                     if (document != null) {
                         for (String getKey : getFieldList){
-                            resultMap.put(getKey,document.getString(getKey));
-                            Log.d(TAG,"AAAAAAAAA"+getKey+":"+document.getString(getKey));
+                            if(getKey.equals("PlayTimeMilliSecond")||getKey.equals("VideoByte")){
+                                resultMap.put(getKey,document.get(getKey));
+                            }else{
+                                resultMap.put(getKey,document.getString(getKey));
+                            }
                         }
                         if(collectionPath.equals("videos")){
                             setVideoButton(resultMap);
@@ -220,17 +224,26 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
                         .into(sendVideoThumbnail);
             }
             //動画テキストのセット
-            TextView videoNameTxt = findViewById(R.id.sendVideoName);
+            TextView videoNameTxt = findViewById(R.id.sendVideoNameTxt);
             videoNameTxt.setText(videoMap.get("VideoName").toString());
-            TextView videoPlayTimeTxt = findViewById(R.id.sendVideoPlayTime);
+            TextView videoPlayTimeTxt = findViewById(R.id.sendVideoPlayTimeTxt);
+            TextView videoByteTxt = findViewById(R.id.sendVideoByteTxt);
+
             if(videoMap.get("PlayTimeMilliSecond").getClass().toString().equals("class java.lang.String")){
-                String PlayTime = videoMap.get("PlayTimeMilliSecond").toString();
-                videoPlayTimeTxt.setText(PlayTime);
+                String playTime = videoMap.get("PlayTimeMilliSecond").toString();
+                videoPlayTimeTxt.setText(playTime);
             } else {
-                String PlayTime = milliSecond.toTimeColonFormat((int)videoMap.get("PlayTimeMilliSecond"));
-                videoPlayTimeTxt.setText(PlayTime);
+                String playTime = milliSecond.toTimeColonFormat(Integer.parseInt(videoMap.get("PlayTimeMilliSecond").toString()));
+                videoPlayTimeTxt.setText(playTime);
             }
 
+            if(videoMap.get("VideoByte").getClass().toString().equals("class java.lang.String")){
+                String videoMegaByte = videoMap.get("VideoByte").toString();
+                videoByteTxt.setText(videoMegaByte);
+            }else{
+                String videoMegaByte = fileByte.toStringMegaByte(Integer.parseInt(videoMap.get("VideoByte").toString()));
+                videoByteTxt.setText(videoMegaByte);
+            }
             //videoURLのセット
             videoURL = videoMap.get("VideoURL").toString();
         } catch (NullPointerException e){

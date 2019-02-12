@@ -71,12 +71,13 @@ public class UploadVideoFileIntentService extends IntentService {
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         for (final String filePass : filesPass){
-            final Uri videoFileUri = Uri.fromFile(new File(filePass));
+            final File videoFile = new File(filePass);
+            int videoByte = (int) videoFile.length();
+            final Uri videoFileUri = Uri.fromFile(videoFile);
             final String videoFileName = videoFileUri.getLastPathSegment();
 
             Map<String, Object> video = new HashMap();
             video.put("VideoName", videoFileName);
-
             db.collection("videos").add(video)
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>(){
                         @Override
@@ -105,7 +106,8 @@ public class UploadVideoFileIntentService extends IntentService {
                 Log.d("onHandleIntent","非同期処理の統合成功！！");
                 Log.d("onHandleIntent","VideoURL"+videoURL);
                 Log.d("onHandleIntent","VideoThumbnailURL"+videoThumbnailURL);
-                WriteVideosFireStore(db, videoID, videoFileName, videoURL, videoThumbnailURL, videoPlayTime);
+
+                WriteVideosFireStore(db, videoID, videoFileName, videoURL, videoThumbnailURL, videoPlayTime, videoByte);
             } catch (InterruptedException e) {
                 Log.d("onHandleIntent","非同期処理の待ち合わせ失敗！！");
                 e.printStackTrace();
@@ -183,15 +185,21 @@ public class UploadVideoFileIntentService extends IntentService {
         });
     }
 
-    public void WriteVideosFireStore(final FirebaseFirestore db, final String videoID, String videoName, String videoURL, String videoThumbnailURL, int playTime) {
+    public void WriteVideosFireStore(final FirebaseFirestore db,
+                                     final String videoID,
+                                     String videoName,
+                                     String videoURL,
+                                     String videoThumbnailURL,
+                                     int playTimeMilliSecond,
+                                     int videoByte) {
         // Create a new user with a first and last name
         final Map<String, Object> video = new HashMap<>();
         //TODO videoオブジェクトに変換
         video.put("VideoName", videoName);
         video.put("VideoURL", videoURL);
-        video.put("PlayTimeMilliSecond", playTime);
+        video.put("PlayTimeMilliSecond", playTimeMilliSecond);
         video.put("ThumbnailURL", videoThumbnailURL);
-        //video.put("VideoByte", taskSnapshot.getMetadata().getSizeBytes());
+        video.put("VideoByte", videoByte);
 
         db.collection("videos")
                 .document(videoID)
@@ -208,6 +216,7 @@ public class UploadVideoFileIntentService extends IntentService {
                     }
                 });
     }
+
     public void WriteVideosOfUsersFireStore(FirebaseFirestore db , String videoID , final Map video){
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();

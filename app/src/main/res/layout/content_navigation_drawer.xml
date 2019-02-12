@@ -70,16 +70,21 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/sendVideoName"
+                            android:id="@+id/sendVideoNameTxt"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="動画ファイルを選択してください" />
 
                         <TextView
-                            android:id="@+id/sendVideoPlayTime"
+                            android:id="@+id/sendVideoPlayTimeTxt"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="" />
+
+                        <TextView
+                            android:id="@+id/sendVideoByteTxt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
                     </LinearLayout>
 
                 </LinearLayout>

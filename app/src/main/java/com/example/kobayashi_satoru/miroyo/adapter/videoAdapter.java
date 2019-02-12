@@ -24,6 +24,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.example.kobayashi_satoru.miroyo.R;
 import com.example.kobayashi_satoru.miroyo.SquareImageView;
+import com.example.kobayashi_satoru.miroyo.fileByte;
 import com.example.kobayashi_satoru.miroyo.listener.OnRecyclerListener;
 import com.example.kobayashi_satoru.miroyo.milliSecond;
 
@@ -68,7 +69,10 @@ public class videoAdapter extends RecyclerView.Adapter {
                 videoHolder.videoNameTxt.setText(videoName);
                 String videoPlayTime = milliSecond.toTimeColonFormat(Integer.parseInt(((HashMap)videoMaps.get(videoIDs.get(position))).get("PlayTimeMilliSecond").toString()));
                 videoHolder.videoPlayTimeTxt.setText(videoPlayTime);
+                String videoMegaByte = fileByte.toStringMegaByte(Integer.parseInt(((HashMap)videoMaps.get(videoIDs.get(position))).get("VideoByte").toString()));
+                videoHolder.videoMegaByteTxt.setText(videoMegaByte);
                 videoThumbnailURL = ((HashMap)videoMaps.get(videoIDs.get(position))).get("ThumbnailURL").toString();
+
             } catch (NullPointerException e){
                 Log.d("",String.valueOf(position));
                 Log.d("",String.valueOf(videoIDs.get(position)));
@@ -145,6 +149,7 @@ public class videoAdapter extends RecyclerView.Adapter {
         SquareImageView videoThumbnail;
         TextView videoNameTxt;
         TextView videoPlayTimeTxt;
+        TextView videoMegaByteTxt;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -152,6 +157,7 @@ public class videoAdapter extends RecyclerView.Adapter {
             videoThumbnail=itemView.findViewById(R.id.videoThumbnail);
             videoNameTxt=itemView.findViewById(R.id.videoNameTxt);
             videoPlayTimeTxt=itemView.findViewById(R.id.videoPlayTimeTxt);
+            videoMegaByteTxt=itemView.findViewById(R.id.videoMegaByteTxt);
         }
     }
 

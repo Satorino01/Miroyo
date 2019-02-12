@@ -6,7 +6,7 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_assignment_24dp"
             android:title="履歴一覧" />
     </group>
 
@@ -14,15 +14,15 @@
         <menu>
             <item
                 android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@drawable/ic_phone_locked_black_24dp"
                 android:title="着信可否" />
             <item
                 android:id="@+id/logout"
-                android:icon="@drawable/ic_menu_send"
+                android:icon="@drawable/ic_arrow_back_black_24dp"
                 android:title="ログアウト" />
             <item
                 android:id="@+id/deleteAcount"
-                android:icon="@drawable/ic_menu_send"
+                android:icon="@drawable/ic_delete_black_24dp"
                 android:title="アカウントの削除" />
         </menu>
     </item>
