@@ -69,7 +69,6 @@ public class PlayVideoActivity extends AppCompatActivity {
                     public void onCompletion(MediaPlayer mediaPlayer) {
 
                         db.collection("requests").document(requestID).delete();
-
                         if(mediaPlayer!=null) {
                             if(mediaPlayer.isPlaying())
                                 mediaPlayer.stop();
@@ -119,8 +118,7 @@ public class PlayVideoActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        videoView.stopPlayback();
-        finishAndRemoveTask();
+        //finishAndRemoveTask();
     }
 
     private void repeatVideo(){

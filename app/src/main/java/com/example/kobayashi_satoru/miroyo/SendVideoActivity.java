@@ -1,11 +1,15 @@
 package com.example.kobayashi_satoru.miroyo;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,12 +17,14 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,18 +52,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SendVideoActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class SendVideoActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, NetworkReceiver.OnNetworkStateChangedListener{
 
     private final String PREF_FILE_NAME = "com.example.kobayashi_satoru.miroyo.SendMovieActivity";
     private String TAG = "SendMovieActivity";
     private String myUserID;
     private String myUserName;
-
     private String videoURL;
 
     private String responseUserID;
     private FirebaseAuth firebaseAuth;
     private NavigationView navigationView;
+
+    private NetworkReceiver mReceiver; //ネットワークの状態監視
+    private AlertDialog alertNetworkDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +90,7 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
             myUserName = currentUser.getDisplayName();
 
             //TODO ↓自分のID名以外の全てのトピックを削除したい
-            //自分のID名でFirebaseMessagingのトピック起動
-            FirebaseMessaging.getInstance().subscribeToTopic(myUserID);
+            FirebaseMessaging.getInstance().subscribeToTopic(myUserID);//自分のID名でFirebaseMessagingのトピック起動
             setUI(currentUser);
         } else {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -426,5 +433,48 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void changedToWifi() {
+        if(alertNetworkDialog != null){
+            alertNetworkDialog.dismiss();
+            alertNetworkDialog = null;
+        }
+    }
+
+    @Override
+    public void changedToMobile() {
+        if(alertNetworkDialog != null){
+            alertNetworkDialog.dismiss();
+            alertNetworkDialog = null;
+        }
+    }
+
+    @Override
+    public void changedToOffline() {
+        alertNetworkDialog = new AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_signal_cellular_off_black_24dp)//.setIcon(R.drawable.ic_signal_wifi_off_black_24dp)
+                .setTitle("OFLINE")
+                .setMessage("ネットワークに接続してください")
+                .show();
+        alertNetworkDialog.setCanceledOnTouchOutside(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Registers BroadcastReceiver to track network connection changes.
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mReceiver = new NetworkReceiver(this);
+        registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mReceiver != null) {
+            unregisterReceiver(mReceiver);
+        }
     }
 }
