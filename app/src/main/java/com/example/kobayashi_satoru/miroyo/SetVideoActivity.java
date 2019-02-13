@@ -57,7 +57,7 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
 
     private String myUserID;
 
-    ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
 
     private NetworkReceiver mReceiver; //ネットワークの状態監視
     private AlertDialog alertNetworkDialog;

@@ -1,15 +1,19 @@
 package com.example.kobayashi_satoru.miroyo;
 
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.kobayashi_satoru.miroyo.receiver.NetworkReceiver;
 import com.example.kobayashi_satoru.miroyo.ui.BaseActivity;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -40,7 +44,7 @@ import java.util.Map;
  * Demonstrate Firebase Authentication using a Facebook access token.
  */
 public class LoginActivity extends BaseActivity implements
-        View.OnClickListener {
+        View.OnClickListener ,NetworkReceiver.OnNetworkStateChangedListener{
 
     private static final String TAG = "FacebookLogin";
 
@@ -48,6 +52,8 @@ public class LoginActivity extends BaseActivity implements
     private FirebaseAuth firebaseAuth;
     private CallbackManager mCallbackManager;
 
+    private NetworkReceiver mReceiver; //ネットワークの状態監視
+    private AlertDialog alertNetworkDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -186,5 +192,48 @@ public class LoginActivity extends BaseActivity implements
         if (i == R.id.buttonFacebookSignout) {
             signOut();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Registers BroadcastReceiver to track network connection changes.
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mReceiver = new NetworkReceiver(this);
+        registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mReceiver != null) {
+            unregisterReceiver(mReceiver);
+        }
+    }
+
+    @Override
+    public void changedToWifi() {
+        if(alertNetworkDialog != null){
+            alertNetworkDialog.dismiss();
+            alertNetworkDialog = null;
+        }
+    }
+
+    @Override
+    public void changedToMobile() {
+        if(alertNetworkDialog != null){
+            alertNetworkDialog.dismiss();
+            alertNetworkDialog = null;
+        }
+    }
+
+    @Override
+    public void changedToOffline() {
+        alertNetworkDialog = new AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_signal_cellular_off_black_24dp)//.setIcon(R.drawable.ic_signal_wifi_off_black_24dp)
+                .setTitle("OFLINE")
+                .setMessage("ネットワークに接続してください")
+                .show();
+        alertNetworkDialog.setCanceledOnTouchOutside(false);
     }
 }

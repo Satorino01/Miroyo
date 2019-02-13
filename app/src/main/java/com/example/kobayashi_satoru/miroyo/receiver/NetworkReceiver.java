@@ -12,7 +12,6 @@ public class NetworkReceiver extends BroadcastReceiver {
     private OnNetworkStateChangedListener mOnNetworkStateChangedListener;
 
     public NetworkReceiver(OnNetworkStateChangedListener onNetworkStateChangedListener) {
-        Log.d("NetworkReceiver","NetworkReceiverあああああああああああああああああああああああ");
         mOnNetworkStateChangedListener = onNetworkStateChangedListener;
     }
 
