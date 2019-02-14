@@ -312,6 +312,7 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
             friendNameTxt.setText(friendMap.get("UserName").toString());
             TextView friendEmailAdressTxt = findViewById(R.id.sendFriendEmailAdressTxt);
             friendEmailAdressTxt.setText(friendMap.get("EmailAdress").toString());
+
             //responseUserIDのセット
             responseUserID = friendID;
         } catch (NullPointerException e){

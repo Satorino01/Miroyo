@@ -271,6 +271,8 @@ public class SetFriendActivity extends AppCompatActivity implements OnRecyclerLi
     }
 
     public void onClickAddFriendButton(View view){
-
+        Intent intent = new Intent(context, AddFriendActivity.class);
+        intent.putExtra("myUserID", myUserID);
+        startActivity(intent);
     }
 }

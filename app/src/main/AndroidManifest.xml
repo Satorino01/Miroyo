@@ -31,6 +31,7 @@
         </activity>
         <activity android:name=".SetVideoActivity" />
         <activity android:name=".SetFriendActivity" />
+        <activity android:name=".AddFriendActivity" />
         <activity
             android:name=".PlayVideoActivity"
             android:configChanges="orientation|screenSize" />
@@ -78,7 +79,7 @@
 
         <service
             android:name=".service.DeleteFriendIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
     </application>
 
 </manifest>
