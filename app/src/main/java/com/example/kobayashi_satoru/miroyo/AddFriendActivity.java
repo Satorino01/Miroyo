@@ -1,8 +1,11 @@
 package com.example.kobayashi_satoru.miroyo;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,15 +17,24 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.kobayashi_satoru.miroyo.adapter.FriendsRequestAdapter;
 import com.example.kobayashi_satoru.miroyo.listener.OnRecyclerListener;
 import com.example.kobayashi_satoru.miroyo.receiver.NetworkReceiver;
 import com.example.kobayashi_satoru.miroyo.service.DeleteFriendIntentService;
+import com.example.kobayashi_satoru.miroyo.service.DeleteFriendsRequestIntentService;
 import com.example.kobayashi_satoru.miroyo.service.MovedFriendListIntentService;
 //import com.example.kobayashi_satoru.miroyo.service.AddFriendIntentService;
+import com.example.kobayashi_satoru.miroyo.service.MovedFriendsRequestListIntentService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -57,8 +69,20 @@ public class AddFriendActivity extends AppCompatActivity implements OnRecyclerLi
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);// レイアウトマネージャを設定(ここで縦方向の標準リストであることを指定)
         friendsRequestRecyclerView.setLayoutManager(linearLayoutManager);
 
-        Intent intent = getIntent();
-        myUserID = intent.getStringExtra("myUserID");
+        try {
+            FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            myUserID = currentUser.getUid();
+            TextView myIDTxt = findViewById(R.id.myIDTxt);
+            myIDTxt.setText(myUserID);
+            ImageView myThumbnail = findViewById(R.id.myThumbnail);
+            RequestOptions options = new RequestOptions().error(R.drawable.sampleusericon)//エラー時に読み込む画像のIDやURL
+                    .placeholder(R.drawable.sampleusericon)//ロード開始時に読み込むIDやURL
+                    .override(300, 300);
+            Glide.with(this).load(currentUser.getPhotoUrl()).apply(options).into(myThumbnail);
+        }catch (NullPointerException e){
+            Log.d("currentUser","setUI失敗",e);
+        }
 
         context = this;
         friendsRequestMaps = new HashMap<>();
@@ -74,8 +98,8 @@ public class AddFriendActivity extends AppCompatActivity implements OnRecyclerLi
                     Map documentMap = documentSnapshot.getData();
                     //friendsRequestIDs = new ArrayList<>(documentMap.keySet());
                     Log.d("AddFriendActivityMap",documentMap.toString());
-                    friendsRequestIDs = (ArrayList<String>) documentMap.get("friendsRequestIDs");
-                    for(String key : friendsRequestIDs){ ;
+                    friendsRequestIDs = (ArrayList<String>) documentMap.get("FriendsRequestIDs");
+                    for(String key : friendsRequestIDs){
                         friendsRequestMaps.put(key,(HashMap)documentMap.get(key));
                     }
                     friendsRequestAdapter = new FriendsRequestAdapter(context, friendsRequestIDs, friendsRequestMaps, (OnRecyclerListener) context);
@@ -90,10 +114,10 @@ public class AddFriendActivity extends AppCompatActivity implements OnRecyclerLi
                                     final int toPos = target.getAdapterPosition();
                                     Log.d("onMoved","fromPos:" + String.valueOf(fromPos) +"toPos:" + String.valueOf(toPos));
                                     friendsRequestAdapter.moved(fromPos, toPos);//friendsRequestIDs内の値交換
-                                    startActionMovedFriend(context);
+                                    startActionMovedFriendsRequest();
                                     return true;// true if moved, false otherwise
                                 }
-
+                                //TODO
                                 @Override
                                 public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                                     final int fromPos = viewHolder.getAdapterPosition();
@@ -201,22 +225,36 @@ public class AddFriendActivity extends AppCompatActivity implements OnRecyclerLi
     }
 
     //クライアント側で操作した結果（friendsRequestIDs）を渡すのみ
-    public void startActionMovedFriend(Context context) {
-        final String ACTION_MovedFriend = "com.example.kobayashi_satoru.miroyo.action.MovedFriend";
-        Intent intent = new Intent(context, MovedFriendListIntentService.class);
+    public void startActionMovedFriendsRequest() {
+        final String ACTION_MovedFriend = "com.example.kobayashi_satoru.miroyo.action.MovedFriendsRequest";
+        Intent intent = new Intent(this, MovedFriendsRequestListIntentService.class);
         intent.setAction(ACTION_MovedFriend);
-        intent.putStringArrayListExtra("friendsRequestIDs", friendsRequestIDs);
-        context.startService(intent);
+        Log.d("startActionMovedFriend","friendsRequestIDs:"+friendsRequestIDs.toString());
+        intent.putStringArrayListExtra("FriendsRequestIDs", friendsRequestIDs);
+        this.startService(intent);
     }
 
     //FriendIDで削除するのは確実性が高いから。friendのpositionはリアルタイムで変更される可能性がある。
     public void startActionDeleteFriend(String deleteFriendID) {
-        final String ACTION_DeleteFriend = "com.example.kobayashi_satoru.miroyo.action.DeleteFriend";
-        Intent intent = new Intent(context, DeleteFriendIntentService.class);
+        final String ACTION_DeleteFriend = "com.example.kobayashi_satoru.miroyo.action.DeleteFriendsRequest";
+        Intent intent = new Intent(this, DeleteFriendsRequestIntentService.class);
         intent.setAction(ACTION_DeleteFriend);
         intent.putExtra("friendsRequestID", deleteFriendID);
-        intent.putExtra("FriendName",friendsRequestMaps.get(deleteFriendID).get("FriendName").toString());
         intent.putStringArrayListExtra("friendsRequestIDs",friendsRequestIDs);
-        context.startService(intent);
+        this.startService(intent);
+    }
+
+    public void onClickCopyMyID(View view){
+        ClipboardManager clipboardManager = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (null == clipboardManager) {
+            return;
+        }
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("", myUserID));
+
+        Context applicationContext = getApplicationContext();
+        Toast toast = Toast.makeText(applicationContext , "クリップボードにコピーしました", Toast.LENGTH_LONG);
+        //View toastView = toast.getView();
+        //toastView.setBackgroundColor(Color.rgb(0,0,0));
+        toast.show();
     }
 }

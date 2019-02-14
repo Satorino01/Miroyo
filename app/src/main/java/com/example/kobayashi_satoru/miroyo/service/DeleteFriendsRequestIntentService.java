@@ -2,6 +2,7 @@ package com.example.kobayashi_satoru.miroyo.service;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -10,18 +11,22 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-public class DeleteFriendIntentService extends IntentService {
-    private final String ACTION_DeleteFriend = "com.example.kobayashi_satoru.miroyo.action.DeleteFriend";
+public class DeleteFriendsRequestIntentService extends IntentService {
+    private final String ACTION_DeleteFriendsRequest = "com.example.kobayashi_satoru.miroyo.action.DeleteFriendsRequest";
     private final CountDownLatch DeleteCountDownLatch = new CountDownLatch(5);
-    private List<String> friendIDs;
+    private List<String> friendsRequestIDs;
 
-    public DeleteFriendIntentService() {
-        super("DeleteFriendFileIntentService");
+    public DeleteFriendsRequestIntentService() {
+        super("DeleteFriendsRequestIntentService");
     }
 
     @Override
@@ -29,27 +34,27 @@ public class DeleteFriendIntentService extends IntentService {
         Log.d("onHandleIntent","起動おおおおおおおおおおおおおおおおおおおおおおおおおおお");
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_DeleteFriend.equals(action)) {
-                String friendID = intent.getStringExtra("friendID");
-                String friendName = intent.getStringExtra("FriendName");
-                friendIDs = intent.getStringArrayListExtra("friendIDs");
-                handleActionDeleteFriend(friendID ,friendName);
+            if (ACTION_DeleteFriendsRequest.equals(action)) {
+                String friendsRequestID = intent.getStringExtra("friendsRequestID");
+                friendsRequestIDs = intent.getStringArrayListExtra("friendsRequestIDs");
+                handleActionDeleteFriend(friendsRequestID);
             }
         }
     }
-    private void handleActionDeleteFriend(String friendID, String friendName) {
-        DeleteFriendsOfUsers(friendID, friendName);
+    private void handleActionDeleteFriend(String friendsRequestID) {
+        DeleteFriendsRequestID(friendsRequestID);
     }
 
-    public void DeleteFriendsOfUsers(String friendID, final String friendName){
+    public void DeleteFriendsRequestID(String friendsRequestID){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         String myUserID = currentUser.getUid();
-        CollectionReference myFriendsCollectionReference = db.collection("users").document(myUserID).collection("friends");
-        myFriendsCollectionReference
-                .document(friendID)
-                .delete()
+        Map<String,Object> deleteUpdates = new HashMap<>();
+        deleteUpdates.put(friendsRequestID, FieldValue.delete());
+        DocumentReference myFriendsRequestsDocumentReference = db.collection("friendsRequest").document(myUserID);
+        myFriendsRequestsDocumentReference
+                .update(deleteUpdates)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -66,10 +71,9 @@ public class DeleteFriendIntentService extends IntentService {
                 });
 
         //TODO friendIDsを既存のものから受け取る
-        friendIDs.remove(friendIDs.indexOf(friendID));
-        myFriendsCollectionReference
-                .document("FriendsData")
-                .update("FriendIDs",friendIDs)
+        friendsRequestIDs.remove(friendsRequestIDs.indexOf(friendsRequestID));
+        myFriendsRequestsDocumentReference
+                .update("FriendsRequestIDs",friendsRequestIDs)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

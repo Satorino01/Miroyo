@@ -10,6 +10,7 @@ import android.util.Log;
 public class NetworkReceiver extends BroadcastReceiver {
 
     private OnNetworkStateChangedListener mOnNetworkStateChangedListener;
+    private String TAG = "NetworkReceiver";
 
     public NetworkReceiver(OnNetworkStateChangedListener onNetworkStateChangedListener) {
         mOnNetworkStateChangedListener = onNetworkStateChangedListener;
@@ -21,7 +22,6 @@ public class NetworkReceiver extends BroadcastReceiver {
         void changedToOffline();
     }
 
-    String TAG = "NetworkReceiver";
     @Override
     public void onReceive(Context context, Intent intent) {
         ConnectivityManager conn = (ConnectivityManager)

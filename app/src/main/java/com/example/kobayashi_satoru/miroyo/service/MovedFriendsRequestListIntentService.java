@@ -11,15 +11,16 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovedFriendsRequestListIntentService extends IntentService {
     // TODO: アクションの名前を変更し、そのタスクを説明するアクション名を選択してください。
-    private final String ACTION_MovedFriend = "com.example.kobayashi_satoru.miroyo.action.MovedFriend";
-    private List<String> friendsRequestIDs;
+    private final String ACTION_MovedFriend = "com.example.kobayashi_satoru.miroyo.action.MovedFriendsRequest";
 
     public MovedFriendsRequestListIntentService() {
-        super("MovedFriendListIntentService");
+        super("MovedFriendsRequestListIntentService");
     }
 
     @Override
@@ -28,25 +29,27 @@ public class MovedFriendsRequestListIntentService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MovedFriend.equals(action)) {
-                friendsRequestIDs = intent.getStringArrayListExtra("friendsRequestIDs");
-                handleActionMovedFriend();
+                ArrayList<String> friendsRequestIDs = intent.getStringArrayListExtra("FriendsRequestIDs");
+                handleActionMovedFriend(friendsRequestIDs);
             }
         }
     }
-    private void handleActionMovedFriend() {
-        MovedFriendIDsOfUsers();
+    private void handleActionMovedFriend(ArrayList<String> friendsRequestIDs) {
+        MovedFriendIDsOfUsers(friendsRequestIDs);
     }
-    public void MovedFriendIDsOfUsers(){
+    public void MovedFriendIDsOfUsers(ArrayList<String> friendsRequestIDs){
+        Log.d("MovedFriendIDsOfUsers","friendsRequestIDs:" + friendsRequestIDs.toString());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         String myUserID = currentUser.getUid();
         DocumentReference myDocumentReference = db.collection("friendsRequest").document(myUserID);
-        myDocumentReference.update("friendsRequestIDs",friendsRequestIDs)
+        myDocumentReference
+                .update("FriendsRequestIDs",friendsRequestIDs)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d("friendsRequestIDs","friendsRequestIDsの順番変更成功");
+                        Log.d("FriendsRequestIDs","friendsRequestIDsの順番変更成功");
                     }
                 });
     }
