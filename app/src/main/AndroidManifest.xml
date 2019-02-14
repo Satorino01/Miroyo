@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".SetVideoActivity" />
-        <activity android:name=".SetUserActivity" />
+        <activity android:name=".SetFriendActivity" />
         <activity
             android:name=".PlayVideoActivity"
             android:configChanges="orientation|screenSize" />
@@ -68,13 +68,17 @@
             android:exported="false" />
         <service
             android:name=".service.MovedVideoListIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
 
-        <receiver android:name=".receiver.NetworkReceiver" >
+        <receiver android:name=".receiver.NetworkReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".service.DeleteFriendIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

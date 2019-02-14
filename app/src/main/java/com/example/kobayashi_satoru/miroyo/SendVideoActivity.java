@@ -145,8 +145,8 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void setUI(FirebaseUser currentUser){
-        responseUserID=null;
-        videoURL=null;
+        responseUserID = null;
+        videoURL = null;
 
         // 設定ファイルを開きます。
         SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
@@ -170,28 +170,18 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         }
 
         //フレンドアイテムのセット
-        String userID = sharedPref.getString("setUserIDSendMovieActivity", "noSetUserStatus");
-        String userImageConfig = sharedPref.getString("setUserIconSendMovieActivity", "noSetUserStatus");
-        if(userID != "noSetUserStatus") {
-            responseUserID = userID;
-            //List<String> getFieldList = Arrays.asList("ThumbnailURL", "UserID", "UserName");
-            //fireBaseRead("users", userID, getFieldList);
-        }
-        TextView userName = findViewById(R.id.setUserName);
-        TextView emailAddress = findViewById(R.id.setEmailAddress);
-        ImageView imageView = findViewById(R.id.userThumbnail);
-        if(userImageConfig.equals("satoruicon")){
-            imageView.setImageResource(R.drawable.satoruicon);
-            userName.setText("小林 慧");
-            emailAddress.setText("satorino0821@gmail.com");
-        }else if(userImageConfig.equals("sampleusericon")){
-            imageView.setImageResource(R.drawable.sampleusericon);
-            userName.setText("小林 さとり");
-            emailAddress.setText("satorino0821@yahoo.co.jp");
+        String friendID = sharedPref.getString("setFriendIDSendVideoActivity", "noSetFriendStatus");
+        Log.d("setFriendID",friendID);
+        if(friendID.equals("noSetFriendStatus")) {
+            responseUserID = null;
+            final HashMap resultMap = new HashMap();
+            resultMap.put("UserName", "友達を選択してください");
+            resultMap.put("EmailAdress", "");
+            resultMap.put("ThumbnailURL", "Default");
+            setFriendButton(resultMap, responseUserID);
         }else{
-            imageView.setImageResource(R.drawable.sampleusericon);
-            userName.setText("送信する友達を選択してください");
-            emailAddress.setText("");
+            List<String> getFieldList = Arrays.asList("ThumbnailURL", "EmailAdress", "UserName");
+            fetchValueFirestore("friends", friendID, getFieldList);
         }
 
         //NavigationDrawerのセット
@@ -207,8 +197,8 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         Uri myThumbnailURL = currentUser.getPhotoUrl();
         ImageView myThumbnailImage = navigationView.getHeaderView(0).findViewById(R.id.myThumbnailImage);
         RequestOptions options = new RequestOptions()
-                .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
-                .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
+                .error(R.drawable.samplevideothumbnail)//エラー時に読み込む画像のIDやURL
+                .placeholder(R.drawable.samplevideothumbnail)//ロード開始時に読み込むIDやURL
                 .circleCrop()
                 .override(200,200);
         Glide.with(this).load(myThumbnailURL)
@@ -223,18 +213,20 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
     }
 
 
-    public void fetchValueFirestore(final String collectionPath, String ID, final List<String> getFieldList) {
+    public void fetchValueFirestore(final String collectionPath, final String ID, final List<String> getFieldList) {
         final HashMap resultMap = new HashMap();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference docRef = db.collection(collectionPath).document(ID);
+        DocumentReference docRef = db.collection("users").document(myUserID).collection(collectionPath).document(ID);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document != null) {
+                        Log.d("document.getId:",document.getId());
+                        Log.d("document.toString():",document.toString());
                         for (String getKey : getFieldList){
-                            if(getKey.equals("PlayTimeMilliSecond")||getKey.equals("VideoByte")){
+                            if(getKey.equals("PlayTimeMilliSecond")||getKey.equals("VideoByte")){//PlayTimeMilliSecondとVideoByteはlong型だから
                                 resultMap.put(getKey,document.get(getKey));
                             }else{
                                 resultMap.put(getKey,document.getString(getKey));
@@ -242,8 +234,8 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
                         }
                         if(collectionPath.equals("videos")){
                             setVideoButton(resultMap);
-                        }else if(collectionPath.equals("users")){
-                            setUserButton(resultMap);
+                        }else if(collectionPath.equals("friends")){
+                            setFriendButton(resultMap, ID);
                         }
                     } else {
                         Log.d("LOGGER", "No such document");
@@ -260,11 +252,11 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         try {
             ImageView sendVideoThumbnail = findViewById(R.id.sendVideoThumbnail);
             if (videoMap.get("ThumbnailURL").toString().equals("Default")){
-                sendVideoThumbnail.setImageResource(R.drawable.samplemoviethumbnail);
+                sendVideoThumbnail.setImageResource(R.drawable.samplevideothumbnail);
             }else{
                 RequestOptions options = new RequestOptions()
-                        .error(R.drawable.samplemoviethumbnail)//エラー時に読み込む画像のIDやURL
-                        .placeholder(R.drawable.samplemoviethumbnail)//ロード開始時に読み込むIDやURL
+                        .error(R.drawable.samplevideothumbnail)//エラー時に読み込む画像のIDやURL
+                        .placeholder(R.drawable.samplevideothumbnail)//ロード開始時に読み込むIDやURL
                         .override(300, 300);
                 Glide.with(this).load(videoMap.get("ThumbnailURL").toString())
                         .apply(options)
@@ -299,13 +291,32 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         }
     }
 
-    public void setUserButton(HashMap userMap){
-
-        //responseUserIDのセット
-        //アイコン画像のセットを書く
-//            task = new DownloadTask();
-//            task.setListener(createListener());
-//            task.execute("https://storage.googleapis.com/miroyo.appspot.com/01.png");
+    public void setFriendButton(HashMap friendMap, String friendID){
+        Log.d("HashMap friendMap:",friendMap.toString());
+        try {
+            ImageView sendFriendThumbnail = findViewById(R.id.sendFriendThumbnail);
+            if (friendMap.get("ThumbnailURL").toString().equals("Default")){
+                sendFriendThumbnail.setImageResource(R.drawable.sampleusericon);
+            }else{
+                RequestOptions options = new RequestOptions()
+                        .error(R.drawable.sampleusericon)//エラー時に読み込む画像のIDやURL
+                        .placeholder(R.drawable.sampleusericon)//ロード開始時に読み込むIDやURL
+                        .override(300, 300);
+                Glide.with(this).load(friendMap.get("ThumbnailURL").toString())
+                        .apply(options)
+                        .listener(createLoggerListener("video_thumbnail"))
+                        .into(sendFriendThumbnail);
+            }
+            //動画テキストのセット
+            TextView friendNameTxt = findViewById(R.id.sendFriendNameTxt);
+            friendNameTxt.setText(friendMap.get("UserName").toString());
+            TextView friendEmailAdressTxt = findViewById(R.id.sendFriendEmailAdressTxt);
+            friendEmailAdressTxt.setText(friendMap.get("EmailAdress").toString());
+            //responseUserIDのセット
+            responseUserID = friendID;
+        } catch (NullPointerException e){
+            Log.d("setFriendButton","FriendItem削除済み",e);
+        }
 
     }
 
@@ -351,7 +362,7 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
 
 
     public void onClickSetUserButton(View view) {
-        Intent intent = new Intent(this, SetUserActivity.class);
+        Intent intent = new Intent(this, SetFriendActivity.class);
         intent.putExtra("myUserID",myUserID);
         startActivity(intent);
     }

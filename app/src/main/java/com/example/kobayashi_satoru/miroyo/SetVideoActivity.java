@@ -19,7 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.kobayashi_satoru.miroyo.adapter.videoAdapter;
+import com.example.kobayashi_satoru.miroyo.adapter.VideoAdapter;
 import com.example.kobayashi_satoru.miroyo.listener.OnRecyclerListener;
 import com.example.kobayashi_satoru.miroyo.receiver.NetworkReceiver;
 import com.example.kobayashi_satoru.miroyo.service.DeleteVideoFileIntentService;
@@ -47,7 +47,7 @@ import java.util.Map;
 
 public class SetVideoActivity extends AppCompatActivity implements OnRecyclerListener, NetworkReceiver.OnNetworkStateChangedListener{
 
-    private videoAdapter videoAdapter;
+    private VideoAdapter VideoAdapter;
     private RecyclerView videoRecyclerView;
     private FilePickerDialog filePickerDialog;
 
@@ -56,8 +56,6 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
     private static ArrayList<String> videoIDs;
 
     private String myUserID;
-
-    private ProgressDialog progressDialog;
 
     private NetworkReceiver mReceiver; //ネットワークの状態監視
     private AlertDialog alertNetworkDialog;
@@ -95,8 +93,8 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
                             videoMaps.put(documentSnapshot.getId(),documentSnapshot.getData());
                         }
                     }
-                    videoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
-                    videoRecyclerView.setAdapter(videoAdapter);
+                    VideoAdapter = new VideoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
+                    videoRecyclerView.setAdapter(VideoAdapter);
 
                     ItemTouchHelper itemTouchHelper  = new ItemTouchHelper(
                             new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP |
@@ -106,7 +104,7 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
                                     final int fromPos = viewHolder.getAdapterPosition();
                                     final int toPos = target.getAdapterPosition();
                                     Log.d("onMoved","fromPos:" + String.valueOf(fromPos) +"toPos:" + String.valueOf(toPos));
-                                    videoAdapter.moved(fromPos, toPos);//videoIDs内の値交換
+                                    VideoAdapter.moved(fromPos, toPos);//videoIDs内の値交換
                                     startActionMovedVideo(context);
                                     return true;// true if moved, false otherwise
                                 }
@@ -118,7 +116,7 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
                                     String deleteVideoID = videoIDs.get(fromPos);
                                     startActionDeleteVideo(deleteVideoID);
                                     CheckSetVideoID(deleteVideoID);
-                                    videoAdapter.remove(fromPos);
+                                    VideoAdapter.remove(fromPos);
                                 }
                             });
                     itemTouchHelper.attachToRecyclerView(videoRecyclerView);
@@ -151,26 +149,18 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
                                 String newVideoID = documentChange.getDocument().getId();
                                 int newPosition = videoMaps.size();
                                 Log.d("newPosition",String.valueOf(newPosition));
-                                videoAdapter.addItem(newPosition,newVideoID,(HashMap)documentChange.getDocument().getData());
-                                //videoAdapter.notifyItemInserted(newPosition);
+                                VideoAdapter.addItem(newPosition,newVideoID,(HashMap)documentChange.getDocument().getData());
                             }
                             break;
                         case MODIFIED://データの変更
                             if(documentChange.getDocument().getId().equals("VideosData")) {
-//                                videoMaps.put(newVideoID, documentChange.getDocument().getData());
-//                                videoAdapter newVideoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
-//                                videoRecyclerView.setAdapter(newVideoAdapter);
                             }
                             break;
                         case REMOVED:
                             if(!documentChange.getDocument().getId().equals("VideosData")) {
                                 String deleteVideoID = documentChange.getDocument().getId();
                                 Log.d("REMOVEDonDataChanged","削除したvideoID:" + deleteVideoID);
-                                Log.d("REMOVEDonDataChanged","削除したvideoIDがvideoIDsに含まれているかどうか(うまくいっているならFalseのはず):" + String.valueOf(videoIDs.contains(deleteVideoID)));
-//                                videoMaps.remove(newVideoID);
-//                                videoIDs.remove(videoIDs.indexOf(newVideoID));
-//                                videoAdapter newVideoAdapter = new videoAdapter(context, videoIDs, videoMaps, (OnRecyclerListener) context);
-//                                videoRecyclerView.setAdapter(newVideoAdapter);
+                                Log.d("REMOVEDonDataChanged","削除したvideoIDがvideoIDsに含まれているかどうか(うまくいっているなら最後はFalseのはず):" + String.valueOf(videoIDs.contains(deleteVideoID)));
                             }else{
                             }
                             break;
@@ -256,15 +246,8 @@ public class SetVideoActivity extends AppCompatActivity implements OnRecyclerLis
             @Override
             public void onSelectedFilePaths(String[] files) {
                 if(checkFileFormat(files)){
-                    progressDialog = new ProgressDialog(context);
-                    progressDialog.setTitle("アップロード中");
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    progressDialog.setCancelable(false);
-                    progressDialog.setMessage("アップロード開始");
-                    //progressDialog.show();// TODO　エラーの原因 E/WindowManager: android.view.WindowLeaked: Activity com.example.kobayashi_satoru.miroyo.SetMovieActivity has leaked window DecorView@ea59cd1[アップロード中] that was originally added hereat android.view.ViewRootImpl.<init>(ViewRootImpl.java:511)
                     startActionUploadVideo(context,files);
                 }else{
-                    progressDialog.hide();
                     Toast.makeText(context,"対応しているのはmp4,webm,のみです。",Toast.LENGTH_SHORT).show();
                 }
             }

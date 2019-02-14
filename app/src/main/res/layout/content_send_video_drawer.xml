@@ -58,7 +58,7 @@
                         android:layout_marginBottom="8dp"
                         android:adjustViewBounds="true"
                         android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/samplemoviethumbnail"/>
+                        app:srcCompat="@drawable/samplevideothumbnail"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -73,7 +73,9 @@
                             android:id="@+id/sendVideoNameTxt"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1"
+                            android:text="動画を選択してください"
+                            />
 
                         <TextView
                             android:id="@+id/sendVideoPlayTimeTxt"
@@ -121,7 +123,7 @@
                     android:orientation="horizontal">
 
                     <com.example.kobayashi_satoru.miroyo.SquareImageView
-                        android:id="@+id/userThumbnail"
+                        android:id="@+id/sendFriendThumbnail"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="8dp"
@@ -142,15 +144,17 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/setUserName"
+                            android:id="@+id/sendFriendNameTxt"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="送信する友達を選択してください" />
 
                         <TextView
-                            android:id="@+id/setEmailAddress"
+                            android:id="@+id/sendFriendEmailAdressTxt"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"/>
                     </LinearLayout>
                 </LinearLayout>
 
