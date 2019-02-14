@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <item android:title="設定">
+        <menu>
+            <item
+                android:id="@+id/switchReceiveLocked"
+                android:icon="@drawable/ic_phone_locked_black_24dp"
+                android:title="動画の着信可否" />
+            <item
+                android:id="@+id/switchScreenSize"
+                android:icon="@drawable/ic_subscriptions_black_24dp"
+                android:title="再生画面のサイズ切替" />
+            <item
+                android:id="@+id/logout"
+                android:icon="@drawable/ic_arrow_back_black_24dp"
+                android:title="ログアウト" />
+            <item
+                android:id="@+id/deleteAcount"
+                android:icon="@drawable/ic_delete_forever_black_24dp"
+                android:title="アカウントの削除" />
+        </menu>
+    </item>
+
+    <item android:title="その他">
+        <menu>
+            <item
+                android:id="@+id/showActionLog"
+                android:icon="@drawable/ic_event_note_black_24dp"
+                android:title="履歴一覧" />
+            <item
+                android:id="@+id/showLicenses"
+                android:icon="@drawable/ic_description_black_24dp"
+                android:title="ライセンス" />
+        </menu>
+
+    </item>
+</menu>

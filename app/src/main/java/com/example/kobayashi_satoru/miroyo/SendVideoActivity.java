@@ -476,10 +476,14 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-
-        }else if (id == R.id.logout) {
+        if (id == R.id.switchReceiveLocked) {
+            //TODO Sharedで画面をロック
+        } else if (id == R.id.switchScreenSize) {
+            //TODO Sharedでピクチャインピクチャか全画面表示かをスイッチ Android Versionが6以下の場合はスイッチできないというダイアログを入れる
+        } else if (id == R.id.logout) {
             signOut();
+        } else if (id == R.id.deleteAcount) {
+            //TODO 警告のダイアログを入れてAcountをDeleteするサービスに処理を投げる
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
