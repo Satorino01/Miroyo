@@ -78,6 +78,9 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/clear_button_bg"
                 android:onClick="onClickCreateVideoItemButton"
+                android:drawableStart="@drawable/ic_file_upload_black_24dp"
+                android:drawablePadding="0dp"
+                android:padding="16dp"
                 android:text="動画のアップロード" />
         </FrameLayout>
 
