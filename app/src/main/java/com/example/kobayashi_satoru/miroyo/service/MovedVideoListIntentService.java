@@ -38,9 +38,9 @@ public class MovedVideoListIntentService extends IntentService {
         }
     }
     private void handleActionMovedVideo() throws InterruptedException {
-        MovedVideosOfUsersFireStore();
+        MovedVideoIDsOfUsers();
     }
-    public void MovedVideosOfUsersFireStore() throws InterruptedException {
+    public void MovedVideoIDsOfUsers() throws InterruptedException {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
