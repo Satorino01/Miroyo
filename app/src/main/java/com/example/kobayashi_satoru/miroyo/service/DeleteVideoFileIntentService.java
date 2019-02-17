@@ -21,7 +21,7 @@ import java.util.concurrent.CountDownLatch;
 public class DeleteVideoFileIntentService extends IntentService {
     // TODO: アクションの名前を変更し、そのタスクを説明するアクション名を選択してください。
     private final String ACTION_DeleteVideo = "com.example.kobayashi_satoru.miroyo.action.DeleteVideo";
-    private final CountDownLatch DeleteCountDownLatch = new CountDownLatch(5);
+    private final CountDownLatch deleteCountDownLatch = new CountDownLatch(5);
     private List<String> videoIDs;
 
     public DeleteVideoFileIntentService() {
@@ -37,32 +37,29 @@ public class DeleteVideoFileIntentService extends IntentService {
                 String videoID = intent.getStringExtra("videoID");
                 String videoName = intent.getStringExtra("VideoName");
                 videoIDs = intent.getStringArrayListExtra("videoIDs");
-                handleActionDeleteVideo(videoID ,videoName);
+                try {
+                    handleActionDeleteVideo(videoID ,videoName);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
-    private void handleActionDeleteVideo(String videoID, String videoName) {
+    private void handleActionDeleteVideo(String videoID, String videoName) throws InterruptedException {
         FetchVideosMetaData(videoID, videoName);
     }
 
-    public void FetchVideosMetaData(String videoID, String videoName){
+    public void FetchVideosMetaData(String videoID, String videoName) throws InterruptedException {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
         StorageReference storageRef = firebaseStorage.getReference();
-        Context context = getApplicationContext();
-        //Toast.makeText(context , "\"" + videoName + "\"\nの削除開始", Toast.LENGTH_LONG).show();
-        
         DeleteVideoThumbnailFirebaseStorage(storageRef, videoID, videoName);
         DeleteVideoFirebaseStorage(storageRef, videoID, videoName);
         DeleteVideosFireStore(db, videoID, videoName);
         DeleteVideosOfUsersFireStore(db, videoID, videoName);
-        try {
-            DeleteCountDownLatch.await();//動画ファイルと動画のサムネファイルのアップロードが終わるまで待機
-            Log.d("onHandleIntent","非同期処理の統合成功！！");
-        } catch (InterruptedException e) {
-            Log.d("onHandleIntent","非同期処理の待ち合わせ失敗！！");
-            e.printStackTrace();
-        }
+        deleteCountDownLatch.await();//動/画ファイルと動画のサムネファイルのアップロードが終わるまで待機
+        Log.d("deleteCountDownLatch","サービス終了：" + String.valueOf(deleteCountDownLatch.getCount()));
+        stopSelf();
         //Toast.makeText(context , "\"" + videoName + "\"\nの削除を完了しました。", Toast.LENGTH_LONG).show();
     }
 
@@ -82,12 +79,12 @@ public class DeleteVideoFileIntentService extends IntentService {
         videoThumbnailsRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                DeleteCountDownLatch.countDown();
+                deleteCountDownLatch.countDown();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                DeleteCountDownLatch.countDown();
+                deleteCountDownLatch.countDown();
             }
         });
     }
@@ -99,12 +96,12 @@ public class DeleteVideoFileIntentService extends IntentService {
         videosRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                DeleteCountDownLatch.countDown();
+                deleteCountDownLatch.countDown();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                DeleteCountDownLatch.countDown();
+                deleteCountDownLatch.countDown();
             }
         });
     }
@@ -116,14 +113,14 @@ public class DeleteVideoFileIntentService extends IntentService {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        DeleteCountDownLatch.countDown();
+                        deleteCountDownLatch.countDown();
                         Log.d("DeleteVideosFire","myVideosの削除成功");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        DeleteCountDownLatch.countDown();
+                        deleteCountDownLatch.countDown();
                         Log.d("DeleteVideosFire","myVideosの削除成功");
                     }
                 });
@@ -139,14 +136,14 @@ public class DeleteVideoFileIntentService extends IntentService {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        DeleteCountDownLatch.countDown();
+                        deleteCountDownLatch.countDown();
                         Log.d("DeleteVideosOfUsersFire","myVideosの削除成功");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        DeleteCountDownLatch.countDown();
+                        deleteCountDownLatch.countDown();
                         Log.d("DeleteVideosOfUsersFire","myVideosの削除失敗",e);
                     }
                 });
@@ -159,7 +156,7 @@ public class DeleteVideoFileIntentService extends IntentService {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        DeleteCountDownLatch.countDown();
+                        deleteCountDownLatch.countDown();
                         Log.d("VideoIDs","videoIDs追加成功");
                     }
                 });

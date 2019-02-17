@@ -10,11 +10,13 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class MovedVideoListIntentService extends IntentService {
     // TODO: アクションの名前を変更し、そのタスクを説明するアクション名を選択してください。
     private final String ACTION_MovedVideo = "com.example.kobayashi_satoru.miroyo.action.MovedVideo";
     private List<String> videoIDs;
+    CountDownLatch finishCountDownLatch = new CountDownLatch(1);
 
     public MovedVideoListIntentService() {
         super("MovedVideoListIntentService");
@@ -27,14 +29,18 @@ public class MovedVideoListIntentService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_MovedVideo.equals(action)) {
                 videoIDs = intent.getStringArrayListExtra("videoIDs");
-                handleActionMovedVideo();
+                try {
+                    handleActionMovedVideo();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
-    private void handleActionMovedVideo() {
+    private void handleActionMovedVideo() throws InterruptedException {
         MovedVideosOfUsersFireStore();
     }
-    public void MovedVideosOfUsersFireStore(){
+    public void MovedVideosOfUsersFireStore() throws InterruptedException {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
@@ -46,8 +52,12 @@ public class MovedVideoListIntentService extends IntentService {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        finishCountDownLatch.countDown();
                         Log.d("VideoIDs","videoIDsの順番変更成功");
                     }
                 });
+        finishCountDownLatch.await();
+        Log.d("awaitFinishCountDown","サービス終了：" + String.valueOf(finishCountDownLatch.getCount()));
+        stopSelf();
     }
 }

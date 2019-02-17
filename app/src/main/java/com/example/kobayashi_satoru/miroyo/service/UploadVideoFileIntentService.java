@@ -38,6 +38,7 @@ public class UploadVideoFileIntentService extends IntentService {
     // TODO: アクションの名前を変更し、そのタスクを説明するアクション名を選択してください。
     private final String ACTION_UploadVideo = "com.example.kobayashi_satoru.miroyo.action.UploadVideo";
     private final CountDownLatch uploadCountDownLatch = new CountDownLatch(3);
+    private final CountDownLatch writeCountDownLatch = new CountDownLatch(3);
     private String videoID;
     private String videoURL;
     private String videoThumbnailURL;
@@ -56,16 +57,20 @@ public class UploadVideoFileIntentService extends IntentService {
             if (ACTION_UploadVideo.equals(action)) {
                 final String[] filesPass = intent.getStringArrayExtra("filesPass");
                 videoIDs = intent.getStringArrayListExtra("videoIDs");
-                handleActionUploadVideo(filesPass);
+                try {
+                    handleActionUploadVideo(filesPass);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    private void handleActionUploadVideo(String[] filesPass) {
+    private void handleActionUploadVideo(String[] filesPass) throws InterruptedException {
         FetchVideosID(filesPass);
     }
 
-    public void FetchVideosID(String[] filesPass){
+    public void FetchVideosID(String[] filesPass) throws InterruptedException {
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         for (final String filePass : filesPass){
@@ -99,17 +104,12 @@ public class UploadVideoFileIntentService extends IntentService {
                             //progressDialog.hide();
                         }
                     });
-            try {
-                uploadCountDownLatch.await();//動画ファイルと動画のサムネファイルのアップロードが終わるまで待機
-                Log.d("onHandleIntent","非同期処理の統合成功！！");
-                Log.d("onHandleIntent","VideoURL"+videoURL);
-                Log.d("onHandleIntent","VideoThumbnailURL"+videoThumbnailURL);
 
-                WriteVideosFireStore(db, videoID, videoFileName, videoURL, videoThumbnailURL, videoPlayTime, videoByte);
-            } catch (InterruptedException e) {
-                Log.d("onHandleIntent","非同期処理の待ち合わせ失敗！！");
-                e.printStackTrace();
-            }
+            uploadCountDownLatch.await();//動画ファイルと動画のサムネファイルのアップロードが終わるまで待機
+            WriteVideosFireStore(db, videoID, videoFileName, videoURL, videoThumbnailURL, videoPlayTime, videoByte);
+            writeCountDownLatch.await();
+            Log.d("awaitWriteCountDown","サービス終了：" + String.valueOf(writeCountDownLatch.getCount()));
+            stopSelf();
         }
     }
 
@@ -227,12 +227,16 @@ public class UploadVideoFileIntentService extends IntentService {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("WriteVideosOfUsersFire","myVideosに追加成功");
+                        writeCountDownLatch.countDown();
+                        Log.d("writeCountDownLatch",String.valueOf(writeCountDownLatch.getCount()));
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.d("WriteVideosOfUsersFire","myVideosに追加失敗いい",e);
+                        writeCountDownLatch.countDown();
+                        Log.d("writeCountDownLatch",String.valueOf(writeCountDownLatch.getCount()));
                     }
                 });
 
@@ -245,10 +249,22 @@ public class UploadVideoFileIntentService extends IntentService {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("VideoIDs","videoIDs追加成功");
+                        writeCountDownLatch.countDown();
+                        Log.d("writeCountDownLatch",String.valueOf(writeCountDownLatch.getCount()));
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("WriteVideosOfUsersFire","myVideosに追加失敗いい",e);
+                        writeCountDownLatch.countDown();
+                        Log.d("writeCountDownLatch",String.valueOf(writeCountDownLatch.getCount()));
                     }
                 });
         Context context = getApplicationContext();
         Toast.makeText(context , "アップロードを完了しました\n\""+ video.get("VideoName").toString()+"\"", Toast.LENGTH_LONG).show();
+        writeCountDownLatch.countDown();
+        Log.d("writeCountDownLatch",String.valueOf(writeCountDownLatch.getCount()));
     }
 
     private int fetchPlayTime(Uri videoURI) {

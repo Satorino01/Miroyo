@@ -14,10 +14,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class MovedFriendsRequestListIntentService extends IntentService {
     // TODO: アクションの名前を変更し、そのタスクを説明するアクション名を選択してください。
     private final String ACTION_MovedFriend = "com.example.kobayashi_satoru.miroyo.action.MovedFriendsRequest";
+    private final CountDownLatch finishCountDownLatch = new CountDownLatch(1);
 
     public MovedFriendsRequestListIntentService() {
         super("MovedFriendsRequestListIntentService");
@@ -30,14 +32,18 @@ public class MovedFriendsRequestListIntentService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_MovedFriend.equals(action)) {
                 ArrayList<String> friendsRequestIDs = intent.getStringArrayListExtra("FriendsRequestIDs");
-                handleActionMovedFriend(friendsRequestIDs);
+                try {
+                    handleActionMovedFriend(friendsRequestIDs);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
-    private void handleActionMovedFriend(ArrayList<String> friendsRequestIDs) {
+    private void handleActionMovedFriend(ArrayList<String> friendsRequestIDs) throws InterruptedException {
         MovedFriendIDsOfUsers(friendsRequestIDs);
     }
-    public void MovedFriendIDsOfUsers(ArrayList<String> friendsRequestIDs){
+    public void MovedFriendIDsOfUsers(ArrayList<String> friendsRequestIDs) throws InterruptedException {
         Log.d("MovedFriendIDsOfUsers","friendsRequestIDs:" + friendsRequestIDs.toString());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -50,7 +56,11 @@ public class MovedFriendsRequestListIntentService extends IntentService {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("FriendsRequestIDs","friendsRequestIDsの順番変更成功");
+                        finishCountDownLatch.countDown();
                     }
                 });
+        finishCountDownLatch.await();
+        Log.d("awaitFinishCountDown","サービス終了：" + String.valueOf(finishCountDownLatch.getCount()));
+        stopSelf();
     }
 }

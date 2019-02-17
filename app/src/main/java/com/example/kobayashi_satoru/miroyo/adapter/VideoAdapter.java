@@ -142,7 +142,6 @@ public class VideoAdapter extends RecyclerView.Adapter {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-
         SquareImageView videoThumbnail;
         TextView videoNameTxt;
         TextView videoPlayTimeTxt;

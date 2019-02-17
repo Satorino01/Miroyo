@@ -10,11 +10,13 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class MovedFriendListIntentService extends IntentService {
     // TODO: アクションの名前を変更し、そのタスクを説明するアクション名を選択してください。
     private final String ACTION_MovedFriend = "com.example.kobayashi_satoru.miroyo.action.MovedFriend";
     private List<String> friendIDs;
+    private final CountDownLatch finishCountDownLatch = new CountDownLatch(1);
 
     public MovedFriendListIntentService() {
         super("MovedFriendListIntentService");
@@ -27,14 +29,18 @@ public class MovedFriendListIntentService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_MovedFriend.equals(action)) {
                 friendIDs = intent.getStringArrayListExtra("friendIDs");
-                handleActionMovedFriend();
+                try {
+                    handleActionMovedFriend();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
-    private void handleActionMovedFriend() {
+    private void handleActionMovedFriend() throws InterruptedException {
         MovedFriendIDsOfUsers();
     }
-    public void MovedFriendIDsOfUsers(){
+    public void MovedFriendIDsOfUsers() throws InterruptedException {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
@@ -49,5 +55,8 @@ public class MovedFriendListIntentService extends IntentService {
                         Log.d("FriendIDs","friendIDsの順番変更成功");
                     }
                 });
+        finishCountDownLatch.await();
+        Log.d("awaitFinishCountDown","サービス終了：" + String.valueOf(finishCountDownLatch.getCount()));
+        stopSelf();
     }
 }

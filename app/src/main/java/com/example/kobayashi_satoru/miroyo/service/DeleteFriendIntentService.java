@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class DeleteFriendIntentService extends IntentService {
     private final String ACTION_DeleteFriend = "com.example.kobayashi_satoru.miroyo.action.DeleteFriend";
-    private final CountDownLatch DeleteCountDownLatch = new CountDownLatch(5);
+    private final CountDownLatch deleteCountDownLatch = new CountDownLatch(2);
     private List<String> friendIDs;
 
     public DeleteFriendIntentService() {
@@ -33,15 +33,19 @@ public class DeleteFriendIntentService extends IntentService {
                 String friendID = intent.getStringExtra("friendID");
                 String friendName = intent.getStringExtra("FriendName");
                 friendIDs = intent.getStringArrayListExtra("friendIDs");
-                handleActionDeleteFriend(friendID ,friendName);
+                try {
+                    handleActionDeleteFriend(friendID ,friendName);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
-    private void handleActionDeleteFriend(String friendID, String friendName) {
+    private void handleActionDeleteFriend(String friendID, String friendName) throws InterruptedException {
         DeleteFriendsOfUsers(friendID, friendName);
     }
 
-    public void DeleteFriendsOfUsers(String friendID, final String friendName){
+    public void DeleteFriendsOfUsers(String friendID, final String friendName) throws InterruptedException {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
@@ -53,14 +57,14 @@ public class DeleteFriendIntentService extends IntentService {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        DeleteCountDownLatch.countDown();
+                        deleteCountDownLatch.countDown();
                         Log.d("DeleteFriendsOfUsers","myFriendsの削除成功");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        DeleteCountDownLatch.countDown();
+                        deleteCountDownLatch.countDown();
                         Log.d("DeleteFriendsOfUsers","myFriendsの削除失敗",e);
                     }
                 });
@@ -73,9 +77,19 @@ public class DeleteFriendIntentService extends IntentService {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        DeleteCountDownLatch.countDown();
+                        deleteCountDownLatch.countDown();
                         Log.d("FriendIDs","friendIDs追加成功");
                     }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        deleteCountDownLatch.countDown();
+                        Log.d("DeleteFriendsOfUsers","myFriendsの削除失敗",e);
+                    }
                 });
+        deleteCountDownLatch.await();
+        Log.d("deleteCountDownLatch","サービス終了：" + String.valueOf(deleteCountDownLatch.getCount()));
+        stopSelf();
     }
 }
