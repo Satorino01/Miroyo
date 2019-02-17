@@ -145,8 +145,8 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void setUI(FirebaseUser currentUser){
-        responseUserID = null;
-        videoURL = null;
+        responseUserID = "default";
+        videoURL = "default";
 
         // 設定ファイルを開きます。
         SharedPreferences sharedPref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
@@ -156,13 +156,13 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         String videoID = sharedPref.getString("setVideoIDSendMovieActivity", "noSetVideoStatus");
         Log.d("setVideoID",videoID);
         if(videoID.equals("noSetVideoStatus")) {
-            videoURL = null;
+            videoURL = "default";
             final HashMap resultMap = new HashMap();
             resultMap.put("VideoName", "動画を選択してください");
             resultMap.put("PlayTimeMilliSecond", "");
             resultMap.put("VideoByte", "");
-            resultMap.put("ThumbnailURL", "Default");
-            resultMap.put("VideoURL", "Default");
+            resultMap.put("ThumbnailURL", "default");
+            resultMap.put("VideoURL", "default");
             setVideoButton(resultMap);
         }else{
             List<String> getFieldList = Arrays.asList("ThumbnailURL", "PlayTimeMilliSecond", "VideoName", "VideoURL", "VideoByte");
@@ -173,11 +173,11 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         String friendID = sharedPref.getString("setFriendIDSendVideoActivity", "noSetFriendStatus");
         Log.d("setFriendID",friendID);
         if(friendID.equals("noSetFriendStatus")) {
-            responseUserID = null;
+            responseUserID = "default";
             final HashMap resultMap = new HashMap();
             resultMap.put("UserName", "友達を選択してください");
             resultMap.put("EmailAdress", "");
-            resultMap.put("ThumbnailURL", "Default");
+            resultMap.put("ThumbnailURL", "default");
             setFriendButton(resultMap, responseUserID);
         }else{
             List<String> getFieldList = Arrays.asList("ThumbnailURL", "EmailAdress", "UserName");
@@ -251,7 +251,7 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         Log.d("HashMap videoMap:",videoMap.toString());
         try {
             ImageView sendVideoThumbnail = findViewById(R.id.sendVideoThumbnail);
-            if (videoMap.get("ThumbnailURL").toString().equals("Default")){
+            if (videoMap.get("ThumbnailURL").toString().equals("default")){
                 sendVideoThumbnail.setImageResource(R.drawable.samplevideothumbnail);
             }else{
                 RequestOptions options = new RequestOptions()
@@ -295,7 +295,7 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
         Log.d("HashMap friendMap:",friendMap.toString());
         try {
             ImageView sendFriendThumbnail = findViewById(R.id.sendFriendThumbnail);
-            if (friendMap.get("ThumbnailURL").toString().equals("Default")){
+            if (friendMap.get("ThumbnailURL").toString().equals("default")){
                 sendFriendThumbnail.setImageResource(R.drawable.sampleusericon);
             }else{
                 RequestOptions options = new RequestOptions()
@@ -369,7 +369,13 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void onClickSendVideoButton(View view) {
-        if(responseUserID!=null&&videoURL!=null) {
+        Log.d("videoURL",videoURL);
+        Log.d("responseUserID",responseUserID);
+        if(responseUserID.equals("default")||videoURL.equals("default")){
+            Context context = getApplicationContext();
+            Toast.makeText(context , "動画と友達の両方を選択してください", Toast.LENGTH_LONG).show();
+        }
+        else{
             if (!isClickEvent()) return;
             Map<String, Object> request = new HashMap<>();
             request.put("RequestUserName", myUserName);
@@ -390,10 +396,6 @@ public class SendVideoActivity extends AppCompatActivity implements NavigationVi
                     Log.w(TAG, "動画の送信に失敗：Error adding document", e);
                 }
             });
-        }
-        else{
-            Context context = getApplicationContext();
-            Toast.makeText(context , "動画と友達の両方を選択してください", Toast.LENGTH_LONG).show();
         }
     }
 

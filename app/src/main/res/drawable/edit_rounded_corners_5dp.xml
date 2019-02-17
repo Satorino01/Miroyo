@@ -2,14 +2,17 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
+            <!-- 枠線 width:線の幅、color:線の色 -->
+            <stroke
+                android:width="2dp"
+                android:color="@color/edit_corners_colors" />
             <corners
                 android:topRightRadius="5dp"
                 android:bottomRightRadius="5dp"
                 android:bottomLeftRadius="5dp"
-                android:topLeftRadius="5dp"
-                />
+                android:topLeftRadius="5dp"/>
             <solid
-                android:color="@color/button_material_light"
+                android:color="@color/item_color"
                 />
         </shape>
     </item>

@@ -6,20 +6,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Spannable;
+import android.text.style.DynamicDrawableSpan;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.text.SpannableString;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -45,6 +53,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static android.text.TextUtils.isEmpty;
 
 public class AddFriendActivity extends AppCompatActivity implements OnRecyclerListener, NetworkReceiver.OnNetworkStateChangedListener{
 
@@ -97,41 +107,43 @@ public class AddFriendActivity extends AppCompatActivity implements OnRecyclerLi
                     DocumentSnapshot documentSnapshot = task.getResult();
                     Map documentMap = documentSnapshot.getData();
                     //friendsRequestIDs = new ArrayList<>(documentMap.keySet());
-                    Log.d("AddFriendActivityMap",documentMap.toString());
-                    friendsRequestIDs = (ArrayList<String>) documentMap.get("FriendsRequestIDs");
-                    for(String key : friendsRequestIDs){
-                        friendsRequestMaps.put(key,(HashMap)documentMap.get(key));
-                    }
-                    friendsRequestAdapter = new FriendsRequestAdapter(context, friendsRequestIDs, friendsRequestMaps, (OnRecyclerListener) context);
-                    friendsRequestRecyclerView.setAdapter(friendsRequestAdapter);
+                    Log.d("Firebaseの読み込み","documentMapがnullかどうか："+String.valueOf(documentMap==null));
+                    if(documentMap!=null){
+                        friendsRequestIDs = (ArrayList<String>) documentMap.get("FriendsRequestIDs");
+                        for(String key : friendsRequestIDs){
+                            friendsRequestMaps.put(key,(HashMap)documentMap.get(key));
+                        }
+                        friendsRequestAdapter = new FriendsRequestAdapter(context, friendsRequestIDs, friendsRequestMaps, (OnRecyclerListener) context);
+                        friendsRequestRecyclerView.setAdapter(friendsRequestAdapter);
 
-                    ItemTouchHelper itemTouchHelper  = new ItemTouchHelper(
-                            new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP |
-                                    ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
-                                @Override
-                                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                                    final int fromPos = viewHolder.getAdapterPosition();
-                                    final int toPos = target.getAdapterPosition();
-                                    Log.d("onMoved","fromPos:" + String.valueOf(fromPos) +"toPos:" + String.valueOf(toPos));
-                                    friendsRequestAdapter.moved(fromPos, toPos);//friendsRequestIDs内の値交換
-                                    startActionMovedFriendsRequest();
-                                    return true;// true if moved, false otherwise
-                                }
-                                //TODO
-                                @Override
-                                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                                    final int fromPos = viewHolder.getAdapterPosition();
-                                    Log.d("onSwiped","fromPos:" + String.valueOf(fromPos));
-                                    String deleteFriendID = friendsRequestIDs.get(fromPos);
-                                    startActionDeleteFriend(deleteFriendID);
-                                    friendsRequestAdapter.remove(fromPos);
-                                }
-                            });
-                    itemTouchHelper.attachToRecyclerView(friendsRequestRecyclerView);
-                    Log.d("onComplete","friendsRequestIDsの要素数:"+String.valueOf(friendsRequestIDs.size()));
-                    Log.d("onComplete","friendMapsの要素数:"+String.valueOf(friendsRequestMaps.size()));
-                    Log.d("onComplete","friendsRequestIDsの中身:" + friendsRequestIDs.toString());
-                    onDataChanged(myDocumentReference, context, friendsRequestIDs, friendsRequestMaps);
+                        ItemTouchHelper itemTouchHelper  = new ItemTouchHelper(
+                                new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP |
+                                        ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
+                                    @Override
+                                    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                                        final int fromPos = viewHolder.getAdapterPosition();
+                                        final int toPos = target.getAdapterPosition();
+                                        Log.d("onMoved","fromPos:" + String.valueOf(fromPos) +"toPos:" + String.valueOf(toPos));
+                                        friendsRequestAdapter.moved(fromPos, toPos);//friendsRequestIDs内の値交換
+                                        startActionMovedFriendsRequest();
+                                        return true;// true if moved, false otherwise
+                                    }
+                                    //TODO
+                                    @Override
+                                    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                                        final int fromPos = viewHolder.getAdapterPosition();
+                                        Log.d("onSwiped","fromPos:" + String.valueOf(fromPos));
+                                        String deleteFriendID = friendsRequestIDs.get(fromPos);
+                                        startActionDeleteFriend(deleteFriendID);
+                                        friendsRequestAdapter.remove(fromPos);
+                                    }
+                                });
+                        itemTouchHelper.attachToRecyclerView(friendsRequestRecyclerView);
+                        Log.d("onComplete","friendsRequestIDsの要素数:"+String.valueOf(friendsRequestIDs.size()));
+                        Log.d("onComplete","friendMapsの要素数:"+String.valueOf(friendsRequestMaps.size()));
+                        Log.d("onComplete","friendsRequestIDsの中身:" + friendsRequestIDs.toString());
+                        onDataChanged(myDocumentReference, context, friendsRequestIDs, friendsRequestMaps);
+                    }
                 }
             }
         });
@@ -256,5 +268,8 @@ public class AddFriendActivity extends AppCompatActivity implements OnRecyclerLi
         //View toastView = toast.getView();
         //toastView.setBackgroundColor(Color.rgb(0,0,0));
         toast.show();
+    }
+    public void onClickRequestButton(View view){
+
     }
 }

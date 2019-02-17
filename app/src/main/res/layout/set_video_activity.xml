@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_color"
     tools:context=".SetVideoActivity">
 
     <TextView
@@ -14,6 +15,7 @@
         android:layout_marginTop="32dp"
         android:gravity="left"
         android:text="送信する動画の選択"
+        android:textColor="@color/headline_text_color"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -62,29 +64,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginRight="32dp"
-            android:layout_marginBottom="0dp"
-            android:layout_weight="0.7"
-            android:background="@drawable/shape_rounded_corners_5dp">
-
-            <Button
-                android:id="@+id/createVideoItemButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/clear_button_bg"
-                android:onClick="onClickCreateVideoItemButton"
-                android:drawableStart="@drawable/ic_file_upload_black_24dp"
-                android:drawablePadding="0dp"
-                android:padding="16dp"
-                android:text="動画のアップロード" />
-        </FrameLayout>
-
-        <FrameLayout
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="0dp"
@@ -92,17 +72,47 @@
             android:layout_marginRight="0dp"
             android:layout_marginBottom="0dp"
             android:layout_weight="0.3"
-            android:background="@drawable/shape_rounded_corners_5dp">
-
-            <Button
-                android:id="@+id/return_button"
-                android:layout_width="match_parent"
+            android:padding="16dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="1"
+            android:background="@drawable/button_corners"
+            android:onClick="onClickReturnButton">
+            <com.example.kobayashi_satoru.miroyo.SquareImageView
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="0dp"
-                android:background="@drawable/clear_button_bg"
-                android:onClick="onClickReturnButton"
-                android:text="戻る" />
-        </FrameLayout>
+                app:srcCompat="@drawable/ic_arrow_back_black_24dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/button_text_color"
+                android:text=" 戻る" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="32dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginBottom="0dp"
+            android:layout_weight="0.7"
+            android:padding="16dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="1"
+            android:background="@drawable/button_corners"
+            android:onClick="onClickCreateVideoItemButton">
+            <com.example.kobayashi_satoru.miroyo.SquareImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:srcCompat="@drawable/ic_file_upload_black_24dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/button_text_color"
+                android:text=" 動画の追加" />
+        </LinearLayout>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

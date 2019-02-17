@@ -9,4 +9,22 @@
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
     <color name="grey_500">#808080</color>
+
+    <color name="headline_text_color">#737373</color>
+
+    <color name="item_color">#F2F2F2</color>
+    <color name="item_text_color">#737373</color>
+    <color name="shadow_color_of_item">#E5E5E5</color>
+    <color name="frame_border_color_of_item">#DDDDDD</color>
+
+    <color name="button_color">#59BCA8</color>
+    <color name="button_push_color">#3c8072</color>
+    <color name="button_text_color">#F2F2F2</color>
+
+    <color name="background_color">#F2F2F2</color>
+
+    <color name="toolbar_color">#59BCA8</color>
+
+    <color name="edit_corners_colors">#59BCA8</color>
+
 </resources>

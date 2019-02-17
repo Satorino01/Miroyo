@@ -2,11 +2,14 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_color"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".SendVideoActivity"
     tools:showIn="@layout/app_bar_send_video">
+
         <LinearLayout
             android:id="@+id/linearLayout4"
             android:layout_width="0dp"
@@ -18,22 +21,31 @@
             android:gravity="top"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_default="percent"
-            app:layout_constraintHeight_percent="0.8"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/movie_choice_txt"
                 android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:layout_marginTop="8dp"
-                android:text="送信する動画の選択" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="送信する動画の選択"
+                android:textColor="@color/headline_text_color"/>
+
+            <View
+                android:id="@+id/underLine2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="0dp"
+                android:background="@color/headline_text_color"
+                app:layout_constraintTop_toBottomOf="@+id/movie_choice_txt"/>
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.25"
-                android:background="@drawable/shape_rounded_corners_5dp">
+                android:layout_height="88dp"
+                android:layout_marginTop="8dp"
+                android:elevation="3dp"
+                android:background="@drawable/item_corners">
 
                 <Button
                     android:id="@+id/file_choice_button"
@@ -75,6 +87,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:textColor="@color/item_text_color"
                             android:text="動画を選択してください"
                             />
 
@@ -83,13 +96,14 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="" />
+                            android:textColor="@color/item_text_color"/>
 
                         <TextView
                             android:id="@+id/sendVideoByteTxt"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1" />
+                            android:layout_weight="1"
+                            android:textColor="@color/item_text_color"/>
                     </LinearLayout>
 
                 </LinearLayout>
@@ -99,15 +113,25 @@
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:layout_marginTop="8dp"
-                android:text="送信する友達の選択" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="送信する友達の選択"
+                android:textColor="@color/headline_text_color"/>
+
+            <View
+                android:id="@+id/underLine3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="0dp"
+                android:background="@color/headline_text_color"
+                app:layout_constraintTop_toBottomOf="@+id/textView"/>
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.25"
-                android:background="@drawable/shape_rounded_corners_5dp">
+                android:layout_height="88dp"
+                android:layout_marginTop="8dp"
+                android:elevation="3dp"
+                android:background="@drawable/item_corners">
 
                 <Button
                     android:id="@+id/user_choice_button"
@@ -149,50 +173,53 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="送信する友達を選択してください" />
+                            android:text="送信する友達を選択してください"
+                            android:textColor="@color/item_text_color"/>
 
                         <TextView
                             android:id="@+id/sendFriendEmailAdressTxt"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="2"/>
+                            android:layout_weight="2"
+                            android:textColor="@color/item_text_color"/>
 
                     </LinearLayout>
                 </LinearLayout>
 
             </FrameLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="0dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginRight="0dp"
+                android:layout_marginBottom="32dp"
+                android:padding="24dp"
+                android:elevation="3dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:background="@drawable/button_corners"
+                android:onClick="onClickSendVideoButton">
+                <com.example.kobayashi_satoru.miroyo.SquareImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    app:srcCompat="@drawable/ic_live_tv_24dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="24dp"
+                    android:text=" 送信ボタン" />
+            </LinearLayout>
 
-            <FrameLayout
-                android:id="@+id/send_button"
+            <TextView
+                android:id="@+id/view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.25"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="32dp"
-                android:background="@drawable/shape_rounded_corners_5dp">
-                <Button
-                    android:onClick="onClickSendVideoButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/clear_button_bg"
-                    android:text="@string/send_video_button_name">
-                </Button>
-            </FrameLayout>
-
+                android:layout_weight="0.3"
+                android:background="@color/colorAccent"
+                android:text="広告枠"
+                android:textColor="@color/button_text_color"/>
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/view"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@color/colorAccent"
-            android:text="広告枠"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_default="percent"
-            app:layout_constraintHeight_percent="0.2"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout4" />
 </android.support.constraint.ConstraintLayout>
